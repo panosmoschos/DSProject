@@ -1,1 +1,1 @@
-This is our DSProject repository
+This is our DSproject repository
