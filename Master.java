@@ -41,9 +41,5 @@ public class Master {
 		}
 	}
 
-	// Μέθοδος για επεξεργασία των αποτελεσμάτων που λαμβάνονται από τον Reducer
-	void processReducerResult(String result) {
-		// Εδώ μπορείτε να κάνετε οτιδήποτε επιθυμείτε με το αποτέλεσμα που λαμβάνετε από τον Reducer
-		System.out.println("Result received from Reducer: " + result);
-	}
+	
 }

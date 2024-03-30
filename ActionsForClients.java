@@ -4,13 +4,11 @@ import java.net.*;
 public class ActionsForClients extends Thread/****/ {
 ObjectInputStream in;
 ObjectOutputStream out;
-Socket socket;
 
 	public ActionsForClients(Socket connection) {
 		try {
-			socket = new Socket("localhost", 5555);
-
-			out = new ObjectOutputStream(socket.getOutputStream());//send data to reducer
+			
+			out = new ObjectOutputStream(connection.getOutputStream());
 			in = new ObjectInputStream(connection.getInputStream());
 
 				/*
@@ -29,9 +27,7 @@ Socket socket;
 			int a = in.readInt();
 			int b = in.readInt();
 
-			int result = a+b;
-
-			out.writeInt(result);
+			out.writeInt(a+b);
 			out.flush();
 				/*
 				*
