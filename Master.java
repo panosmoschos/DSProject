@@ -1,26 +1,49 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 public class Master {
-    private static final int PORT = 12345;
 
-    @SuppressWarnings("resource")
-    public static void main(String[] args) {
-        Map<String, Integer> data = new HashMap<>();
-        // Εδώ μπορείτε να προσθέσετε αρχικά δεδομένα στο Map, αν είναι απαραίτητο
+	public static void main(String args[]) {
+		new Master().openServer();
+	}
+	
+	/* Define the socket that receives requests */
+	ServerSocket server; 
+	Socket socket = null;
 
-        try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
-            System.out.println("Master listening on port " + PORT);
 
-            while (true) {
-                Socket socket = serverSocket.accept();
-                Worker worker = new Worker(socket, data);
-                worker.start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	/* Define the socket that is used to handle the connection */
+	
+	void openServer() {
+		try {
+
+			/* Create Server Socket */
+			server = new ServerSocket(4444);
+
+			while (true) {
+				/* Accept the connection */
+				socket = server.accept();
+			
+				/* Handle the request */
+				Thread t = new ActionsForClients(socket);
+
+				t.start();
+			}
+
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		} finally {
+			try {
+				socket.close();
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
+		}
+	}
+
+	// Μέθοδος για επεξεργασία των αποτελεσμάτων που λαμβάνονται από τον Reducer
+	void processReducerResult(String result) {
+		// Εδώ μπορείτε να κάνετε οτιδήποτε επιθυμείτε με το αποτέλεσμα που λαμβάνετε από τον Reducer
+		System.out.println("Result received from Reducer: " + result);
+	}
 }
