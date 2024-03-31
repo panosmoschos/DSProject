@@ -1,42 +1,55 @@
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Client extends Thread {
-	int a, b;
-	Client(int a, int b) {
-		this.a = a;
-		this.b = b;
-	}
 
+	String Type;//Manager or Client
+	String received;
+	Scanner scanner = new Scanner(System.in);
+
+	
 	public void run() {
-		ObjectInputStream in =null;
-		ObjectOutputStream out = null;
 		Socket socket = null;
-
+		ObjectOutputStream out = null;
+		ObjectInputStream in =null;
+		String answer = "";
 
 		try {
 
 			/* Create socket for contacting the server on port 4444*/
 			socket = new Socket("localhost", 4444);
 
-
 			/* Create the streams to send and receive data from server */
-			
-			in = new ObjectInputStream(socket.getInputStream());
 			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
+
+			while (true) {
+				System.out.println("Choose: Manager/Client");
+				Type = scanner.nextLine();
+
+				if (Type.equals("Manager")){
+					System.out.println("1)Add Room.\n2)Add available dates.\n3)Show reservations.\nExit");
+                	answer = scanner.nextLine();
+				}else if(Type.equals("Client")){
+					System.out.println("1)Filter Rooms.\n2)Book a room.\n3)Rate a room.\nExit");
+                	answer = scanner.nextLine();
+				}else if (answer.equalsIgnoreCase("Exit")) {
+                    System.out.println("Closing this connection : " + socket);
+                    out.writeUTF("exit");
+                    socket.close();
+                    System.out.println("Connection closed");
+                    break;
+                }
+                out.writeUTF(answer);
+				out.flush();
+
+				System.out.println(in.readUTF());
 
 
 
-
-			/* Write the two integers */
-			out.writeInt(a);
-			out.flush();
-			out.writeInt(b);
-			out.flush();
-
-			/* Print the received result from server */
-			System.out.println("Server>" + in.readInt());
-
+			}
+		
 		} catch (UnknownHostException unknownHost) {
 			System.err.println("You are trying to connect to an unknown host!");
 		} catch (IOException ioException) {
@@ -51,16 +64,9 @@ public class Client extends Thread {
 		}
 	}
 	
+
+
 	public static void main(String args[]) {
-		new Client(10, 5).start();
-		new Client(20, 5).start();
-		new Client(30, 5).start();
-		new Client(40, 5).start();
-		new Client(50, 5).start();
-		new Client(60, 5).start();
-		new Client(70, 5).start();
-		new Client(80, 5).start();
-		new Client(90, 5).start();
-		new Client(100, 5).start();
+		new Client().start();
 	}
 }

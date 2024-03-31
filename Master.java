@@ -19,10 +19,13 @@ public class Master {
 
 			/* Create Server Socket */
 			server = new ServerSocket(4444);
+			System.out.println("Waiting for connections");
 
 			while (true) {
 				/* Accept the connection */
 				socket = server.accept();
+				System.out.println("New connection!");
+				
 			
 				/* Handle the request */
 				Thread t = new ActionsForClients(socket);
