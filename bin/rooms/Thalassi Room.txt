@@ -1,0 +1,10 @@
+{
+"roomName": "Thalassi Room",
+"noOfPersons": 3,
+"area": "Koufonisia",
+"stars": 5,
+"noOfReviews": 1,
+"roomImage": "/usr/bin/images/Thalassi Room.png",
+"price": "220",
+"availability": [{"start_date": "2024-06-07","end_date": "2024-07-02"},{"start_date": "2024-07-09","end_date": "2024-07-28"}]
+}
