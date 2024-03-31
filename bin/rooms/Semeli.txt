@@ -1,0 +1,10 @@
+{
+"roomName": "Semeli",
+"noOfPersons": 2,
+"area": "Paros",
+"stars": 4,
+"noOfReviews": 10,
+"roomImage": "/usr/bin/images/Semeli.png",
+"price": "100",
+"availability": [{"start_date": "2024-06-07","end_date": "2024-07-03"},{"start_date": "2024-07-09","end_date": "2024-07-25"}]
+}
