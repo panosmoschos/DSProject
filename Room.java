@@ -44,6 +44,9 @@ public class Room {
         return room.area;
     }
 
+    public String getRoomName(){
+        return roomName;
+    }
 
 
 

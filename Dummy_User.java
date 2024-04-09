@@ -15,6 +15,7 @@ public class Dummy_User extends Thread {
         ObjectInputStream in = null;
         String answer = "";
         String RoomDetails = "";
+        String path = "";
 
         try {
             //while (true) {
@@ -32,13 +33,40 @@ public class Dummy_User extends Thread {
                     out.writeUTF("Manager");
                     System.out.println("1)Add Room.\n2)Add available dates.\n3)Show reservations.\nExit");
                     answer = scanner.nextLine();
+                    if(answer.equals("1")){
+                        System.out.println("Provide the path of the room.");
+                        path = scanner.nextLine();
+
+                    }else if(answer.equals("2")){
+                        System.out.println("Provide the name of the room and the dates you want to add.");
+
+                    }else if(answer.equals("3")){
+                        System.out.println("Provide your name.");
+
+                    }else if (answer.equalsIgnoreCase("Exit")) {
+                        System.out.println("Closing this connection : " + socket);
+                        out.writeUTF("exit");
+                        socket.close();
+                        System.out.println("Connection closed");
+                        //  break;
+                }
+
+
                 } else if (Type.equals("Client")) {
                     out.writeUTF("Client");
                     System.out.println("1)Filter Rooms.\n2)Book a room.\n3)Rate a room.\nExit");
                     answer = scanner.nextLine();
+                    
                     if (answer.equals("1")) {
-                        System.out.println("Location,Available Dates,Number of people,Price,Stars");
+                        System.out.println("Describe your filter as: Location,Available Dates,Number of people,Price,Stars");
                         RoomDetails = scanner.nextLine();
+                        
+                    }else if(answer.equals("2")){
+                        System.out.println("Name of the room you want to book?");
+
+                    }else if(answer.equals("3")){
+                        System.out.println("Name of the room you want to rate, rating?");
+
                     }
                 } else if (answer.equalsIgnoreCase("Exit")) {
                     System.out.println("Closing this connection : " + socket);

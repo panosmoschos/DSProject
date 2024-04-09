@@ -7,6 +7,7 @@ import java.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import java.net.*;
 
 public class Master {
     private static final int NUM_WORKERS = 3;
@@ -15,7 +16,7 @@ public class Master {
 
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
-        rooms = roomsOfFolder(folderPath);
+        rooms = readFolder(folderPath);
 
         try (ServerSocket serverSocket = new ServerSocket(12345)) {
             System.out.println("Master Server started...");
@@ -27,14 +28,8 @@ public class Master {
                 worker.start();
             }
 
-            int numRooms = rooms.size();
-            int workerIndex = 0;
-            for (int i = 0; i < numRooms; i++) {
-                Room room = rooms.get(i);
-                Worker worker = workers.get(workerIndex);
-                worker.assignRoom(room);
-                workerIndex = (workerIndex + 1) % NUM_WORKERS;
-            }
+            // Hashing and assigning the starting rooms to the workers
+            addRooms(folderPath);
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -47,7 +42,7 @@ public class Master {
     }
 
 
-    public static List<Room> roomsOfFolder(String path) {//read and add the rooms 
+    public static List<Room> readFolder(String path) {//read and list the rooms of a folder 
         File dir = new File(path);
         File[] files = dir.listFiles();
 
@@ -91,7 +86,24 @@ public class Master {
         }
         return rooms;
     }
+
+    public static int hash(String roomName){ // simple hash function
+        int hash=7;
+        for (int i = 0; i < roomName.length(); i++) {
+            hash = (hash*11 + roomName.charAt(i)) % 3;
+        }
+        return hash;
+    }
+
+    private static void addRooms(String givenPath) { // distributing room(s) to workers 
+        rooms = readFolder(givenPath);
+        for (Room room : rooms) {
+            int workerID = hash(room.getRoomName()) % NUM_WORKERS;                
+            Worker worker = workers.get(workerID);
+            worker.assignRoom(room);
+        }
+    }
+
+
+
 }
-
-
-
