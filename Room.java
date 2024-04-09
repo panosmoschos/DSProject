@@ -36,9 +36,14 @@ public class Room {
     }
 
     // for testing
-    public String getOwner(){
-        return owner;
+    public static String getOwner(Room room){
+        return room.owner;
     }
+
+    public  String getArea(Room room){
+        return room.area;
+    }
+
 
 
 
