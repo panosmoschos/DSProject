@@ -7,7 +7,7 @@ import java.util.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import java.net.*;
+
 
 public class Master {
     private static final int NUM_WORKERS = 3;
@@ -16,6 +16,7 @@ public class Master {
 
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
+        //rooms = readFolder(folderPath);
         rooms = readFolder(folderPath);
 
         try (ServerSocket serverSocket = new ServerSocket(12345)) {
@@ -28,8 +29,17 @@ public class Master {
                 worker.start();
             }
 
+            int numRooms = rooms.size();
+            int workerIndex = 0;
+            for (int i = 0; i < numRooms; i++) {
+                Room room = rooms.get(i);
+                Worker worker = workers.get(workerIndex);
+                worker.assignRoom(room);
+                workerIndex = (workerIndex + 1) % NUM_WORKERS;
+            }
+
             // Hashing and assigning the starting rooms to the workers
-            addRooms(folderPath);
+            //addRooms(folderPath);
 
             while (true) {
                 Socket socket = serverSocket.accept();

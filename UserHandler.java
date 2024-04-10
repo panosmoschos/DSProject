@@ -8,6 +8,7 @@ public class UserHandler extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private List<Worker> workers;
+    private int userid;
 
     public UserHandler(Socket connection,List<Worker> workers) throws IOException {
         this.connection = connection;
@@ -22,7 +23,8 @@ public class UserHandler extends Thread {
             if (type.equals("Client")) {
                 String function = in.readUTF(); // receives the request e.x filtering
                 String FilterDetails = in.readUTF(); // receives the details for the filtering
-                Request newrequest = new Request(type, function, FilterDetails);
+                userid = connection.getPort();
+                Request newrequest = new Request(type, function, FilterDetails,userid);
 
                // Στέλνουμε το αίτημα σε κάθε Worker
                 for (Worker worker : workers) {

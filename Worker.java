@@ -18,17 +18,22 @@ public class Worker extends Thread {
     }
     
     public void run() {
+        
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Worker started" + port);
+            System.out.println(assignedRooms);
             while (true) {
                 Socket userHandlersocket = serverSocket.accept();
                 out = new ObjectOutputStream(userHandlersocket.getOutputStream());
                 in = new ObjectInputStream(userHandlersocket.getInputStream());
                 // Read the request object from the socket
                 Request request = (Request) in.readObject();
+                int key = request.UserPort;
                 System.out.println("Worker " + id + " processing request: " + request);
-                WorkerThread workerThread = new WorkerThread(request);
+                
+                WorkerThread workerThread = new WorkerThread(request,key);
                 workerThread.start();
+                
 
                 // Apply the map function on the request
                 // Here you can implement your map function logic
@@ -42,50 +47,67 @@ public class Worker extends Thread {
             e.printStackTrace();
         }
     }
-    
 
-    // Method to assign a room to the worker
-    public void assignRoom(Room room) {
+    private class WorkerThread extends Thread {
+        private Request request;
+        private int key;
+
+    public WorkerThread(Request request, int key) {
+        this.request = request;
+        this.key = key;
+    }
+
+    public void run() {
+        // Εδώ γίνεται η επεξεργασία του αιτήματος
+        //System.out.println("WorkerThread processing request: " + request);
+        //Filtering 
+        Pair<Integer, List<Room>> result = map(key, request);
+        System.out.println(result.getKey());
+        System.out.println(result.getValue());
+    
+    }
+}
+    private class Pair<K, V> implements Serializable{
+        private final K key;
+        private final V value;
+
+        public Pair(K key, V value)
+        {
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey()
+        {
+            return key;
+        }
+
+        public V getValue()
+        {
+            return value;
+        }
+    }   
+
+      // Method to assign a room to the worker
+      public void assignRoom(Room room) {
         assignedRooms.add(room);
     }
 
     public int getPort() {
         return port;
     }
-
-
-    private class WorkerThread extends Thread {
-        private Request request;
-
-    public WorkerThread(Request request) {
-        this.request = request;
-    }
-
-    public void run() {
-        // Εδώ γίνεται η επεξεργασία του αιτήματος
-        System.out.println("WorkerThread processing request: " + request);
-        //Filtering 
-        if (request.type.equals("Client") && request.function.equals("1")){
-            if(request.details.equals("Location")){
-                for (Room room : assignedRooms){
-                    System.out.println(room.getArea(room));
+    
+    public Pair<Integer, List<Room>> map(int key, Request value) {
+        List<Room> roomList = new ArrayList<>();
+        if (value.type.equals("Client") && value.function.equals("1")) {
+            if (value.details.equals("Location")) {
+                for (Room room : assignedRooms) {
+                    roomList.add(room);
                 }
             }
-            
-
         }
-        // Παράδειγμα επεξεργασίας: Καθυστέρηση για να προσομοιώσουμε επεξεργασία
-        try {
-            System.out.println("WorkerThread processing request: " + request.type);
-            Thread.sleep(2000); // Καθυστέρηση για 2 δευτερόλεπτα
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Ολοκληρώθηκε η επεξεργασία, μπορούμε να επιστρέψουμε το αποτέλεσμα ή να ενημερώσουμε κάποιον άλλο μηχανισμό
-        // Για παράδειγμα, μπορούμε να ενημερώσουμε τον αιτούντα για την ολοκλήρωση του αιτήματος
+        return new Pair<>(key, roomList);
     }
-}
 }
 
 
