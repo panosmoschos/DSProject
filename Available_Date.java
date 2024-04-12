@@ -1,8 +1,8 @@
-import java.io.Serializable;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-public class Available_Date implements Serializable{
+public class Available_Date{
     // FORMAT DATE: yyyy/MM/dd
 
     private LocalDate FirstDay;
@@ -11,6 +11,11 @@ public class Available_Date implements Serializable{
     Available_Date(LocalDate FirstDay, LocalDate LastDay){
         this.FirstDay = FirstDay;
         this.LastDay = LastDay;
+    }
+
+    Available_Date(LocalDate day){
+        this.FirstDay = day;
+        this.LastDay= day;
     }
 
     public LocalDate getFirstDay() {
@@ -28,6 +33,15 @@ public class Available_Date implements Serializable{
     public void setLastDay(LocalDate lastDay) {
         LastDay = lastDay;
     }   
+
+    public boolean isAvailable(List<Available_Date> available_dates, Available_Date date){
+        for (Available_Date freeDate : available_dates){
+            if (!date.LastDay.isBefore(freeDate.FirstDay) && !date.FirstDay.isAfter(freeDate.LastDay)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean OverlapsWith(Available_Date newDate){
         if (newDate.LastDay.isBefore(FirstDay)){
