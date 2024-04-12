@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Dummy_User extends Thread {
@@ -7,6 +8,9 @@ public class Dummy_User extends Thread {
 	String Type;//Manager or Client
 	String received;
 	Scanner scanner = new Scanner(System.in);
+    Pair<Integer, List<Room>> finalresult;
+    Socket reducerSocket = null;
+    ObjectInputStream reducerIn = null;
 
 	
 	public void run() {
@@ -21,11 +25,11 @@ public class Dummy_User extends Thread {
             //while (true) {
                 /* Create socket for contacting the server on port 4444 */
                 socket = new Socket("localhost", 12345);
-
+                System.out.println(socket);
                 /* Create the streams to send and receive data from server */
                 out = new ObjectOutputStream(socket.getOutputStream());
-                //in = new ObjectInputStream(socket.getInputStream());
-
+                
+                
                 System.out.println("Choose: Manager/Client");
                 Type = scanner.nextLine();
 
@@ -81,7 +85,19 @@ public class Dummy_User extends Thread {
                 out.flush();
                 out.writeUTF(RoomDetails); // Details for filtering
                 out.flush();
-          //  }
+
+                in = new ObjectInputStream(socket.getInputStream());
+                System.out.println(in.readUTF());
+
+                // Connect to the ReducerHandler
+               // reducerSocket = new Socket("localhost", finalresult.getKey());
+                //reducerIn = new ObjectInputStream(reducerSocket.getInputStream());
+
+                // Listen for results from the ReducerHandler
+               // Pair<Integer, List<Room>> reducerResult = (Pair<Integer, List<Room>>) reducerIn.readObject();
+                //System.out.println(reducerResult);
+
+             // }
 
         } catch (UnknownHostException unknownHost) {
 			System.err.println("You are trying to connect to an unknown host!");

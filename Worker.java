@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Worker extends Thread {
-    private ObjectOutputStream out;
     private ObjectInputStream in;
     private int id,port;
     private List<Room> assignedRooms;
@@ -14,7 +13,6 @@ public class Worker extends Thread {
         this.id = id;
         this.port = port;
         this.assignedRooms = new ArrayList<>();
-        
     }
     
     public void run() {
@@ -24,7 +22,7 @@ public class Worker extends Thread {
             System.out.println(assignedRooms);
             while (true) {
                 Socket userHandlersocket = serverSocket.accept();
-                out = new ObjectOutputStream(userHandlersocket.getOutputStream());
+                System.out.println(userHandlersocket);
                 in = new ObjectInputStream(userHandlersocket.getInputStream());
                 // Read the request object from the socket
                 Request request = (Request) in.readObject();
@@ -40,7 +38,6 @@ public class Worker extends Thread {
 
                 // Close the socket and streams
                 in.close();
-                out.close();
                 userHandlersocket.close();
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -62,31 +59,14 @@ public class Worker extends Thread {
         //System.out.println("WorkerThread processing request: " + request);
         //Filtering 
         Pair<Integer, List<Room>> result = map(key, request);
+        sendResultsToReducer(result);
+
         System.out.println(result.getKey());
         System.out.println(result.getValue());
     
     }
 }
-    private class Pair<K, V> implements Serializable{
-        private final K key;
-        private final V value;
-
-        public Pair(K key, V value)
-        {
-            this.key = key;
-            this.value = value;
-        }
-
-        public K getKey()
-        {
-            return key;
-        }
-
-        public V getValue()
-        {
-            return value;
-        }
-    }   
+     
 
       // Method to assign a room to the worker
       public void assignRoom(Room room) {
@@ -107,6 +87,15 @@ public class Worker extends Thread {
             }
         }
         return new Pair<>(key, roomList);
+    }
+
+    private void sendResultsToReducer(Pair<Integer, List<Room>> result) {
+        try (Socket reducerSocket = new Socket("localhost", 23456);
+            ObjectOutputStream out = new ObjectOutputStream(reducerSocket.getOutputStream())) {
+            out.writeObject(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

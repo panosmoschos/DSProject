@@ -1,7 +1,6 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "c:\\Program Files\\Java\\json-simple-1.1.1.jar",
-        "c:\\Users\\Panagiotis\\OneDrive\\Documents\\University\\6οejamino\\Katanemimena\\DSProject\\json-simple-1.1.1.jar"
+        "c:\\Program Files\\Java\\json-simple-1.1.1.jar"
     ]
 }

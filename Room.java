@@ -6,7 +6,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 
-public class Room {
+public class Room implements Serializable {
     private String roomName;
     private int noOfPersons;
     private String area;

@@ -13,6 +13,7 @@ public class Master {
     private static final int NUM_WORKERS = 3;
     private static List<Worker> workers = new ArrayList<>();
     private static List<Room> rooms = new ArrayList<>();
+    private static Map<Integer, Socket> portSockets = new HashMap<>();
 
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
@@ -43,8 +44,19 @@ public class Master {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("New connection: " + socket);
-                new UserHandler(socket, workers).start();
+                //System.out.println("New connection: " + socket);
+                
+                // Check if the connection is from the Reducer
+                if (isConnectionFromReducer(socket)) {
+                    System.out.println("New reducer connection: " + socket);
+                // Handle connection from Reducer
+                    portSockets.put(socket.getPort(), socket);
+                    new ReducerHandler(socket,portSockets).start();
+                } else {
+                    System.out.println("New user connection: " + socket);
+                    // Handle connection from User
+                    new UserHandler(socket, workers).start();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -96,6 +108,19 @@ public class Master {
         }
         return rooms;
     }
+
+
+    private static boolean isConnectionFromReducer(Socket socket) {
+        // Define the port number where the Reducer is expected to connect
+        int reducerPort = 23456;
+    
+        // Get the remote port of the incoming connection
+        int remotePort = socket.getPort();
+    
+        // Compare the remote port with the Reducer's port number
+        return remotePort == reducerPort;
+    }
+    
 
     public static int hash(String roomName){ // simple hash function
         int hash=7;

@@ -39,8 +39,23 @@ public class UserHandler extends Thread {
                         e.printStackTrace();
                     }
                 }
+            }else{// REDUCER ANSWER
+                System.out.println(type);
+                @SuppressWarnings("unchecked")
+                Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
+                System.out.println(result);
+                int dummyUserPort = result.getKey();
+                System.out.println(dummyUserPort);
+                try (Socket dummyUserSocket = new Socket("localhost", dummyUserPort);
+                    ObjectOutputStream dummyUserOut = new ObjectOutputStream(dummyUserSocket.getOutputStream())) {
+                    dummyUserOut.writeUTF("Hola");
+                    //dummyUserOut.writeObject(result);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (IOException e) {
+            
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {
