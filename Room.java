@@ -6,7 +6,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 
-public class Room implements Serializable {
+public class Room {
     private String roomName;
     private int noOfPersons;
     private String area;
@@ -48,10 +48,21 @@ public class Room implements Serializable {
         return roomName;
     }
 
+    // (Owner) Adds new available dates
+    public void addAvailability(Request req){
+        List<Available_Date> newDates = new ArrayList<>();
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
+        String[] details = req.details.split(",");
 
-    // Owner adding new available dates
-    public void addAvailability(List<Available_Date> newDates){
+        int i = 1; // skipping 0 because details[0] is the name of the room
+        while (i<=details.length-1){
+            LocalDate newdate = LocalDate.parse(details[i],df);  
+            Available_Date desiredDate = new Available_Date(newdate);
+            i++;
+            newDates.add(desiredDate);
+        }
+
         boolean overlapping = false;    // assuming the dates do not overlap
 
         for (Available_Date existingDate : availability){
@@ -71,7 +82,89 @@ public class Room implements Serializable {
         }
        
     }
+
     
+    // Changes the rating and the noOfReviews of the room
+    public void ratingChanges(Request req){
+        String[] details = req.details.split(",");
+        int newStarRating = Integer.parseInt(details[1]);
+        noOfReviews++;
+        stars = (stars*noOfReviews + newStarRating)/noOfPersons;
+    }
+
+    // Filters a list of rooms
+    public List<Room> filterRooms(List<Room> givenRooms, Request req) {
+        List<Room> matchingRooms = new ArrayList<>();
+
+        String[] arrayFilter = req.details.split(",");
+        // [Location, First Day Of Stay, Last Day Of Stay, NumOfPeople, Price, Stars]
+
+        for (Room r: givenRooms) {
+            if(r.filterByArea(arrayFilter[0]) && 
+             r.filterByPersons(arrayFilter[3]) && 
+             r.filterByPrice(arrayFilter[4]) && 
+             r.filterByStars(arrayFilter[5]) && 
+             r.filterByDates(arrayFilter[1], arrayFilter[2])){
+                matchingRooms.add(r);
+            }
+        }
+        return matchingRooms;
+    }
+
+    public boolean filterByArea(String desiredArea){
+        if (desiredArea.equals("x")){
+            return true;
+        }else{
+            return area.equals(desiredArea);
+        }
+    }
+
+    public boolean filterByPersons(String desiredNoOfPersons){
+        if (desiredNoOfPersons.equals("x")){
+            return true;
+        }else{
+            return noOfPersons == Integer.parseInt(desiredNoOfPersons);
+        }
+    }
+
+    public boolean filterByPrice(String desiredPrice){
+        if (desiredPrice.equals("x")){
+            return true;
+        }else{
+            return price <= Integer.parseInt(desiredPrice);
+        }
+    }
+
+    public boolean filterByStars(String desiredStars){
+        if (desiredStars.equals("x")){
+            return true;
+        }else{
+            return stars >= Integer.parseInt(desiredStars);
+        }
+    }
+
+    public boolean filterByDates(String FirstDay, String LastDay){
+        if (FirstDay.equals("x") || LastDay.equals("x")){
+            return true;
+        }else{
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate FD = LocalDate.parse(FirstDay,df);  
+            LocalDate LD =  LocalDate.parse(LastDay,df);
+            Available_Date desiredDate = new Available_Date(FD, LD);
+            return desiredDate.isAvailable(availability, desiredDate);
+        }
+    }
+
+    // Returns the room with the desired roomName
+    public Room findRoomByName(String rName, List<Room> RoomList){
+        for (Room r : RoomList){
+            if(rName.equals(r.roomName)){
+                return r;
+            }
+        }
+        System.out.println("There was no room with the name" + rName);
+        return null;
+    }
 
     public static List<Room> roomsOfFolder(String path) {
         File dir = new File(path);
@@ -114,7 +207,7 @@ public class Room implements Serializable {
                 rooms.add(room);
 
             }catch (Exception e){
-                System.out.println( "Exception:" + e);
+                System.out.println("Exception:" + e);
             }   
         }
         return rooms;
@@ -125,9 +218,18 @@ public class Room implements Serializable {
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
         List<Room> rooms = roomsOfFolder(folderPath);
-        for (Room room: rooms){
-            System.out.println(room.area);
+        
+        String filter = "x,x,x,x,200,x";
+        Request r = new Request(filter, folderPath, filter, 0);
+
+        /* prepei na kaneis th filterRooms static gia na treksei
+        
+        List<Room> filtered = filterRooms(rooms, r);
+        for (Room f : filtered){
+            System.out.println(f.getRoomName());
         }
+
+        */
     }
 
 }
