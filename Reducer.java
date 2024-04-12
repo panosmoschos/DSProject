@@ -47,6 +47,7 @@ public class Reducer {
                 int tempkey = result.getKey();
                 int count=0;
 
+                synchronized(results){
                 results.add(result);//add the result in the results list
 
                 for (Pair<Integer, List<Room>> res : results){
@@ -55,7 +56,7 @@ public class Reducer {
                     }
                 }
                 System.out.println(results);
-
+                }
                 if (count == 3) {//if you find 3 results with the same userid, reduce them and delete them!
                     Pair<Integer, List<Room>> finalResult = reduceForUserId(tempkey);
 
@@ -68,11 +69,13 @@ public class Reducer {
                             }
                         }
                     }
-                    System.out.println(finalResult.getValue());
+                    synchronized(finalResult){
+                    System.out.println(finalResult.getValue().get(0).getRoomName());
+                    System.out.println(finalResult.getValue().get(1).getRoomName());
                     System.out.println(finalResult.getKey());
-
+                    }
                     // Send the final result to the Master
-                    sendResultToMaster(finalResult);
+                    //sendResultToMaster(finalResult);
                 }
                 
                

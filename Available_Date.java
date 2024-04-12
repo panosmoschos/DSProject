@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class Available_Date{
+public class Available_Date implements Serializable{
     // FORMAT DATE: yyyy/MM/dd
 
     private LocalDate FirstDay;

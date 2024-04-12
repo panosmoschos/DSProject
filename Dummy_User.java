@@ -64,10 +64,12 @@ public class Dummy_User extends Thread {
                         RoomDetails = scanner.nextLine();
                         
                     }else if(answer.equals("2")){
-                        System.out.println("Name of the room you want to book?");
+                        System.out.println("Name of the room you want to book, dates?");
+                        RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("3")){
                         System.out.println("Name of the room you want to rate, rating?");
+                        RoomDetails = scanner.nextLine();
 
                     }
                 } else if (answer.equalsIgnoreCase("Exit")) {

@@ -32,10 +32,6 @@ public class Worker extends Thread {
                 WorkerThread workerThread = new WorkerThread(request,key);
                 workerThread.start();
                 
-
-                // Apply the map function on the request
-                // Here you can implement your map function logic
-
                 // Close the socket and streams
                 in.close();
                 userHandlersocket.close();
@@ -48,6 +44,7 @@ public class Worker extends Thread {
     private class WorkerThread extends Thread {
         private Request request;
         private int key;
+        
 
     public WorkerThread(Request request, int key) {
         this.request = request;
@@ -57,12 +54,42 @@ public class Worker extends Thread {
     public void run() {
         // Εδώ γίνεται η επεξεργασία του αιτήματος
         //System.out.println("WorkerThread processing request: " + request);
-        //Filtering 
-        Pair<Integer, List<Room>> result = map(key, request);
-        sendResultsToReducer(result);
 
-        System.out.println(result.getKey());
-        System.out.println(result.getValue());
+        //Filtering 
+        if (request.function.equals("1")){
+            Pair<Integer, List<Room>> result = map(key, request);
+            sendResultsToReducer(result);
+            System.out.println(result.getKey());
+            System.out.println(result.getValue());
+        }
+        
+        //Booking
+        if (request.function.equals("2")){
+            String[] details = request.details.split(",");
+            String roomname = details[0];
+            String dates = details[1];
+            for ( Room room : assignedRooms){
+                if (room.getRoomName().equals(roomname)){
+                    room.addBooking(dates); //NEEDS IMPLEMENTATION! IN ROOM.JAVA
+                    continue;
+                }
+            }
+        }
+
+        //Rating
+        if (request.function.equals("3")){
+            String[] details = request.details.split(",");
+            String roomname = details[0];
+            for ( Room room : assignedRooms){
+                if (room.getRoomName().equals(roomname)){
+                    room.ratingChanges(request);
+                    System.out.println(room.getStars());
+                    continue;
+                }
+            }
+        }
+
+        
     
     }
 }
@@ -79,13 +106,7 @@ public class Worker extends Thread {
     
     public Pair<Integer, List<Room>> map(int key, Request value) {
         List<Room> roomList = new ArrayList<>();
-        if (value.type.equals("Client") && value.function.equals("1")) {
-            if (value.details.equals("Location")) {
-                for (Room room : assignedRooms) {
-                    roomList.add(room);
-                }
-            }
-        }
+        roomList = Room.filterRooms(assignedRooms,value);
         return new Pair<>(key, roomList);
     }
 

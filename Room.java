@@ -6,7 +6,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 
-public class Room {
+public class Room implements Serializable {
     private String roomName;
     private int noOfPersons;
     private String area;
@@ -46,6 +46,10 @@ public class Room {
 
     public String getRoomName(){
         return roomName;
+    }
+
+    public int getStars(){
+        return stars;
     }
 
     // (Owner) Adds new available dates
@@ -89,11 +93,12 @@ public class Room {
         String[] details = req.details.split(",");
         int newStarRating = Integer.parseInt(details[1]);
         noOfReviews++;
-        stars = (stars*noOfReviews + newStarRating)/noOfPersons;
+        //stars = (stars*noOfReviews + newStarRating)/noOfPersons;
+        stars += newStarRating; //just for testing
     }
 
     // Filters a list of rooms
-    public List<Room> filterRooms(List<Room> givenRooms, Request req) {
+    public static List<Room> filterRooms(List<Room> givenRooms, Request req) {
         List<Room> matchingRooms = new ArrayList<>();
 
         String[] arrayFilter = req.details.split(",");
