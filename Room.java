@@ -52,53 +52,84 @@ public class Room implements Serializable {
         return stars;
     }
 
-    // (Owner) Adds new available dates
+
+    public void addBooking(Request req){
+        // looks like [roomName,FirstDayOfStay,LastDayOfStay]
+        String[] details = req.details.split(","); 
+        String FirstDay = details[1];
+        String LastDay = details[2];
+
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        LocalDate FD = LocalDate.parse(FirstDay,df);
+        LocalDate LD = LocalDate.parse(LastDay,df);
+
+        Available_Date wanted = new Available_Date(FD,LD);
+
+        if (wanted.isAvailable(availability)){
+            availability = wanted.RemoveFrom(availability);
+        }else{
+            System.out.println("Sorry, this date is not available at " + details[0] + ".");
+        }
+    }
+
+    // (Manager) Adds new available dates
     public void addAvailability(Request req){
+
+        String[] details = req.details.split(",");
         List<Available_Date> newDates = new ArrayList<>();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-        String[] details = req.details.split(",");
+        if (details.length % 2 == 0){
+            System.out.println("Incorrect input. Please try again");
+        }else{
+            int i = 1; // skipping 0 because details[0] is the name of the room
+            while (i<=details.length-1){
+                LocalDate newFirstDay = LocalDate.parse(details[i],df);  
+                LocalDate newLastDay = LocalDate.parse(details[i+1],df);
+                Available_Date desiredDate = new Available_Date(newFirstDay,newLastDay);
+                i=i+2;
+                newDates.add(desiredDate);
+            }
 
-        int i = 1; // skipping 0 because details[0] is the name of the room
-        while (i<=details.length-1){
-            LocalDate newdate = LocalDate.parse(details[i],df);  
-            Available_Date desiredDate = new Available_Date(newdate);
-            i++;
-            newDates.add(desiredDate);
-        }
+            boolean overlapping = false;    // assuming the dates do not overlap
 
-        boolean overlapping = false;    // assuming the dates do not overlap
+            doubleLoop:
+            for (Available_Date existingDate : availability){
+                for (Available_Date newDate : newDates){
+                    if (newDate.OverlapsWith(existingDate)){
+                        System.out.println("The dates are overlapping. Please try again.");
+                        overlapping = true;
+                        break doubleLoop;
+                    }
+                    for (Available_Date newDate2 : newDates){
+                        if (newDate2 != newDate && newDate2.OverlapsWith(newDate)){
+                            System.out.println("The given dates are overlapping. Please try again.");
+                            overlapping = true;
+                            break doubleLoop;
+                        }
+                    }
+                }
+            }
 
-        for (Available_Date existingDate : availability){
-            for (Available_Date newDate : newDates){
-                if (newDate.OverlapsWith(existingDate)){
-                    System.out.println("The dates are overlapping. Please try again.");
-                    overlapping = true;
+            // If there are truly no overlapping dates
+            if (!overlapping){
+                for(Available_Date newDate : newDates){
+                    availability = newDate.safeAdd(availability);
                 }
             }
         }
-
-        // If there are truly no overlapping dates
-        if (!overlapping){
-            for (Available_Date newDate: newDates){
-                availability.add(newDate);
-            }
-        }
-       
     }
 
-    
     // Changes the rating and the noOfReviews of the room
     public void ratingChanges(Request req){
         String[] details = req.details.split(",");
         int newStarRating = Integer.parseInt(details[1]);
-        noOfReviews++;
-        //stars = (stars*noOfReviews + newStarRating)/noOfPersons;
-        stars += newStarRating; //just for testing
+        noOfReviews +=1;
+        stars = (stars * (noOfReviews - 1) + newStarRating) / noOfReviews;
     }
 
     // Filters a list of rooms
-    public static List<Room> filterRooms(List<Room> givenRooms, Request req) {
+    public List<Room> filterRooms(List<Room> givenRooms, Request req) {
         List<Room> matchingRooms = new ArrayList<>();
 
         String[] arrayFilter = req.details.split(",");
@@ -156,12 +187,12 @@ public class Room implements Serializable {
             LocalDate FD = LocalDate.parse(FirstDay,df);  
             LocalDate LD =  LocalDate.parse(LastDay,df);
             Available_Date desiredDate = new Available_Date(FD, LD);
-            return desiredDate.isAvailable(availability, desiredDate);
+            return desiredDate.isAvailable(availability);
         }
     }
 
     // Returns the room with the desired roomName
-    public Room findRoomByName(String rName, List<Room> RoomList){
+    public static Room findRoomByName(String rName, List<Room> RoomList){
         for (Room r : RoomList){
             if(rName.equals(r.roomName)){
                 return r;
@@ -223,12 +254,58 @@ public class Room implements Serializable {
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
         List<Room> rooms = roomsOfFolder(folderPath);
+
+        /* TESTING addAvailability 
+
+        Request rAvailability = new Request("x", folderPath, "Thalassi Room,2024/07/03,2024/07/08", 0);
+
+        Room room = findRoomByName("Thalassi Room",rooms);
+        System.out.println("BEFORE BOOKING");
+        for (Available_Date r :room.availability){
+            System.out.println(r.getTimePeriod());
+        }
+
+        room.addAvailability(rAvailability);
+
+        System.out.println("\nAFTER BOOKING");
+        for (Available_Date r : room.availability){
+            System.out.println(r.getTimePeriod());
+        }
+        System.out.println();
+
+        */
+
         
-        String filter = "x,x,x,x,200,x";
-        Request r = new Request(filter, folderPath, filter, 0);
+        /*  TESTING addBooking
+        Request rBooking = new Request("x", folderPath, "Thalassi Room,2024/06/15,2024/06/30", 0);
+        Room room = findRoomByName("Thalassi Room",rooms);
+        System.out.println("BEFORE BOOKING");
+        for (Available_Date r :room.availability){
+            System.out.println(r.getTimePeriod());
+        }
+        room.addBooking(rBooking);
+        System.out.println("\nAFTER BOOKING");
+        for (Available_Date r :room.availability){
+            System.out.println(r.getTimePeriod());
+        }
+        System.out.println();
+
+        */
+
+
+        /*  TESTING ratingChanges
+        Room room = findRoomByName("Thalassi Room",rooms);
+        System.out.println(room.stars);
+        String details = "Thalassi Room,1";
+        Request r = new Request(details, folderPath, details, 0);
+        room.ratingChanges(r);
+        System.out.println(room.stars);
+
+        */
+        
 
         /* prepei na kaneis th filterRooms static gia na treksei
-        
+
         List<Room> filtered = filterRooms(rooms, r);
         for (Room f : filtered){
             System.out.println(f.getRoomName());
