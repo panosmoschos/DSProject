@@ -10,10 +10,11 @@ public class UserHandler extends Thread {
     private List<Worker> workers;
     private int userid;
 
-    public UserHandler(Socket connection,List<Worker> workers) throws IOException {
+    public UserHandler(Socket connection,List<Worker> workers, ObjectInputStream inputStream) throws IOException {
         this.connection = connection;
         this.workers = workers;
-        in = new ObjectInputStream(connection.getInputStream());
+        this.in = inputStream;
+        
     }
 
     public void run() {
@@ -39,29 +40,27 @@ public class UserHandler extends Thread {
                         e.printStackTrace();
                     }
                 }
-            }else{// REDUCER ANSWER
-                System.out.println(type);
-                @SuppressWarnings("unchecked")
-                Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
-                System.out.println(result);
-                int dummyUserPort = result.getKey();
-                System.out.println(dummyUserPort);
-                try (Socket dummyUserSocket = new Socket("localhost", dummyUserPort);
-                    ObjectOutputStream dummyUserOut = new ObjectOutputStream(dummyUserSocket.getOutputStream())) {
-                    dummyUserOut.writeUTF("Hola");
-                    //dummyUserOut.writeObject(result);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            }
+
+            try {
+                // Make the current thread sleep for 5 seconds
+                Thread.sleep(5000); // Sleep for 5 seconds (5000 milliseconds)
+            } catch (InterruptedException e) {
+                // Handle the interruption if needed
+                e.printStackTrace();
             }
             
-        } catch (IOException | ClassNotFoundException e) {
+
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (in != null) in.close();
-                if (out != null) out.close();
-                connection.close();
+                if (!connection.isClosed()) {
+                    if (in != null) in.close();
+                    if (out != null) out.close();
+                    System.out.println("User handler Closing connection");
+                    connection.close();
+                }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }

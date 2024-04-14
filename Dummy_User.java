@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class Dummy_User extends Thread {
@@ -7,6 +8,7 @@ public class Dummy_User extends Thread {
 	String Type;//Manager or Client
 	String received;
 	Scanner scanner = new Scanner(System.in);
+   
 
 	
 	public void run() {
@@ -18,14 +20,16 @@ public class Dummy_User extends Thread {
         String path = "";
 
         try {
-            //while (true) {
+            while (true) {
                 /* Create socket for contacting the server on port 4444 */
                 socket = new Socket("localhost", 12345);
-
+                //new ResponseListener(socket).start();
                 /* Create the streams to send and receive data from server */
                 out = new ObjectOutputStream(socket.getOutputStream());
-                //in = new ObjectInputStream(socket.getInputStream());
-
+               
+                
+                out.writeUTF("CLIENT");
+                out.flush();
                 System.out.println("Choose: Manager/Client");
                 Type = scanner.nextLine();
 
@@ -85,25 +89,55 @@ public class Dummy_User extends Thread {
                 out.flush();
                 out.writeUTF(RoomDetails); // Details for filtering
                 out.flush();
-          //  }
+
+
+                if (answer.equals("1") && Type.equals("Client")){
+                    // Now let's listen for the results sent from the ReducerHandler
+                    try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {
+                        
+                            @SuppressWarnings("unchecked")
+                            Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) resultInput.readObject();
+                           
+                            System.out.println("Received resultsss: " + result.getValue().get(0).getRoomName() +" "+ result.getValue().get(0).getStars());
+                            System.out.println("Received resultsss: "  + result.getValue().get(1).getRoomName() +" "+ result.getValue().get(1).getStars());
+                    
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+               
+                
+            }
 
         } catch (UnknownHostException unknownHost) {
 			System.err.println("You are trying to connect to an unknown host!");
+        
+        } catch (EOFException eof) {
+            // Connection is closed, handle accordingly
+            System.err.println("Connection closed by server.");
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
-		} finally {
+		} finally { 
 			try {
-				if (in != null) in.close();
-				if (out != null) out.close();
-				if (socket != null) socket.close();
+                if (!socket.isClosed()) {
+                    if (in != null) in.close();
+                    if (out != null) out.close();
+                    System.out.println("Dummy_User Closing connection");
+                    if (socket != null) socket.close();
+                }
+				
+				
 			} catch (IOException ioException) {
 				ioException.printStackTrace();
-			}}
+			}
+        }
     }
 	
-
 
 	public static void main(String args[]) {
 		new Dummy_User().start();
 	}
 }
+
+

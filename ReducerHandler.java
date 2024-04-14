@@ -10,17 +10,52 @@ public class ReducerHandler extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public ReducerHandler(Socket socket,Map<Integer, Socket> portSockets) {
+    public ReducerHandler(Socket socket,Map<Integer, Socket> portSockets,ObjectInputStream inputStream) {
         this.socket = socket;
         this.portSockets = portSockets;
+        this.in = inputStream;
     }
 
     @Override
     public void run() {
-        try {
-            handleReducerCommunication();
-        } catch (IOException e) {
+        try{
+
+            @SuppressWarnings("unchecked")
+            Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
+
+            // Process the received result (e.g., store it)
+            
+
+            // Get the port number from the result
+            int portNumber = result.getKey();
+
+            // Get the socket associated with the port number
+            Socket userSocket = portSockets.get(portNumber);
+
+            // Write the result to the user's socket
+            if (userSocket != null) {
+                try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
+                    
+                    out.writeObject(result);
+                    System.out.println("ReudcerHandler sent the results!!" );
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("User socket not found for user ID: " );
+            }
+
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
+        } finally {
+            // Close the socket
+            try {
+                socket.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
@@ -46,6 +81,7 @@ public class ReducerHandler extends Thread {
             // Write the result to the user's socket
             if (userSocket != null) {
                 try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
+                    
                     out.writeObject(result);
                 }
             } else {

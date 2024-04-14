@@ -70,7 +70,7 @@ public class Worker extends Thread {
             String dates = details[1];
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
-                    room.addBooking(dates); //NEEDS IMPLEMENTATION! IN ROOM.JAVA
+                   // room.addBooking(dates); //NEEDS IMPLEMENTATION! IN ROOM.JAVA
                     continue;
                 }
             }

@@ -14,6 +14,7 @@ public class Master {
     private static List<Worker> workers = new ArrayList<>();
     private static List<Room> rooms = new ArrayList<>();
     private static Map<Integer, Socket> portSockets = new HashMap<>();
+    
 
     public static void main(String[] args) {
         String folderPath = "bin/rooms";
@@ -45,17 +46,17 @@ public class Master {
             while (true) {
                 Socket socket = serverSocket.accept();
                 //System.out.println("New connection: " + socket);
-                
+                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                 // Check if the connection is from the Reducer
-                if (isConnectionFromReducer(socket)) {
-                    System.out.println("New reducer connection: " + socket);
+                if (isConnectionFromReducer(socket,inputStream)) {
+                    System.out.println("New REDUCER connection: " + socket);
                 // Handle connection from Reducer
                     portSockets.put(socket.getPort(), socket);
-                    new ReducerHandler(socket,portSockets).start();
+                    new ReducerHandler(socket,portSockets,inputStream).start();
                 } else {
-                    System.out.println("New user connection: " + socket);
-                    // Handle connection from User
-                    new UserHandler(socket, workers).start();
+                    System.out.println("New USER connection: " + socket);
+                    portSockets.put(socket.getPort(), socket);
+                    new UserHandler(socket, workers, inputStream).start();
                 }
             }
         } catch (IOException e) {
@@ -110,15 +111,21 @@ public class Master {
     }
 
 
-    private static boolean isConnectionFromReducer(Socket socket) {
-        // Define the port number where the Reducer is expected to connect
-        int reducerPort = 23456;
-    
-        // Get the remote port of the incoming connection
-        int remotePort = socket.getPort();
-    
-        // Compare the remote port with the Reducer's port number
-        return remotePort == reducerPort;
+    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {
+       
+       try {
+            //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            String type = inputStream.readUTF();
+            if (type.equals("CLIENT")){
+                return false;
+            }else if(type.equals("REDUCER")){
+                return true;
+            }
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }return false;
     }
     
 

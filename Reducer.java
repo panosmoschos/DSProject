@@ -9,6 +9,7 @@ public class Reducer {
     private int port;
     private List<Pair<Integer, List<Room>>> results;
     private Map<Integer, Integer> requestCountMap;
+    private final static Object lock = new Object();
     
 
     public Reducer(int port) {
@@ -75,7 +76,7 @@ public class Reducer {
                     System.out.println(finalResult.getKey());
                     }
                     // Send the final result to the Master
-                    //sendResultToMaster(finalResult);
+                    sendResultToMaster(finalResult);
                 }
                 
                
@@ -102,11 +103,8 @@ public class Reducer {
         private void sendResultToMaster(Pair<Integer, List<Room>> finalResult) {
             try (Socket newsocket = new Socket("localhost", 12345);
                 ObjectOutputStream out = new ObjectOutputStream(newsocket.getOutputStream())) {
-                int localPort = socket.getLocalPort();
-                out.writeInt(localPort);
+                out.writeUTF("REDUCER");
                 out.flush();
-                //out.writeUTF("CLIENT");
-                //out.flush();
                 out.writeObject(finalResult);
                 out.flush();
             } catch (IOException e) {
