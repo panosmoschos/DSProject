@@ -129,7 +129,7 @@ public class Room implements Serializable {
     }
 
     // Filters a list of rooms
-    public static List<Room> filterRooms(List<Room> givenRooms, Request req) {
+    public List<Room> filterRooms(List<Room> givenRooms, Request req) {
         List<Room> matchingRooms = new ArrayList<>();
 
         String[] arrayFilter = req.details.split(",");
