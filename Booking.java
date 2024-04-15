@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class Booking {
+public class Booking implements Serializable{
     Available_Date DateOfStay;
     String roomName;
     String area;
