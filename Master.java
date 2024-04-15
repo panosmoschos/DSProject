@@ -1,13 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 
 public class Master {
     private static final int NUM_WORKERS = 3;
@@ -17,10 +11,12 @@ public class Master {
     
 
     public static void main(String[] args) {
-        String folderPath = "bin/rooms";
-        //rooms = readFolder(folderPath);
-        rooms = readFolder(folderPath);
 
+        //Initialize the rooms.
+        String folderPath = "bin/rooms";
+        rooms = Room.roomsOfFolder(folderPath);
+
+        //Start the Master Server.
         try (ServerSocket serverSocket = new ServerSocket(12345)) {
             System.out.println("Master Server started...");
 
@@ -45,12 +41,10 @@ public class Master {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                //System.out.println("New connection: " + socket);
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-                // Check if the connection is from the Reducer
+                // Check if the connection is from the Reducer or a new user.
                 if (isConnectionFromReducer(socket,inputStream)) {
                     System.out.println("New REDUCER connection: " + socket);
-                // Handle connection from Reducer
                     portSockets.put(socket.getPort(), socket);
                     new ReducerHandler(socket,portSockets,inputStream).start();
                 } else {
@@ -64,59 +58,12 @@ public class Master {
         }
     }
 
-
-    public static List<Room> readFolder(String path) {//read and list the rooms of a folder 
-        File dir = new File(path);
-        File[] files = dir.listFiles();
-
-        for (File f : files){
-            try {
-                JSONParser parser = new JSONParser();
-                Object obj = parser.parse(new FileReader(f));
-                JSONObject JSONobj= (JSONObject) obj;
-
-                String roomName = (String) JSONobj.get("roomName");
-                int noOfPersons = ((Long) JSONobj.get("noOfPersons")).intValue();
-                String area = (String) JSONobj.get("area");
-                int stars = ((Long) JSONobj.get("stars")).intValue();
-                int noOfReviews = ((Long) JSONobj.get("noOfReviews")).intValue();
-                String roomImage = (String) JSONobj.get("roomImage");
-                int price = ((Long) JSONobj.get("price")).intValue();
-                String owner = (String) JSONobj.get("owner");
-
-                List<Available_Date> dates = new ArrayList<>();
-
-                JSONArray available_dates = (JSONArray) JSONobj.get("availability");
-                for (Object Obj : available_dates){
-                    JSONObject jsonOB = (JSONObject) Obj;
-                    String FirstDayString = (String) jsonOB.get("start_date");
-                    String LastDayString = (String) jsonOB.get("end_date");
-                    
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-                    LocalDate FirstDayDate = LocalDate.parse(FirstDayString,df);  
-                    LocalDate LastDayDate =  LocalDate.parse(LastDayString,df);
-                    
-
-                    dates.add(new Available_Date(FirstDayDate,LastDayDate));
-                }
-
-                Room room = new Room(roomName, noOfPersons, area, stars, noOfReviews, roomImage, price, dates, owner);
-                rooms.add(room);
-
-            }catch (Exception e){
-                System.out.println( "Exception:" + e);
-            }   
-        }
-        return rooms;
-    }
-
-
-    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {
+    
+    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {//Checks if the new connection is from a new user of the reducer.
        
        try {
-            //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             String type = inputStream.readUTF();
-            if (type.equals("CLIENT")){
+            if (type.equals("USER")){
                 return false;
             }else if(type.equals("REDUCER")){
                 return true;
@@ -137,15 +84,12 @@ public class Master {
         return hash;
     }
 
-    private static void addRooms(String givenPath) { // distributing room(s) to workers 
-        rooms = readFolder(givenPath);
+    /*private static void addRooms(String givenPath) { // distributing room(s) to workers 
+        rooms = Room.roomsOfFolder(givenPath);
         for (Room room : rooms) {
             int workerID = hash(room.getRoomName()) % NUM_WORKERS;                
             Worker worker = workers.get(workerID);
             worker.assignRoom(room);
         }
-    }
-
-
-
+    }*/
 }

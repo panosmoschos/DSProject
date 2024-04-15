@@ -27,9 +27,9 @@ public class Dummy_User extends Thread {
                 out = new ObjectOutputStream(socket.getOutputStream());
                
                 
-                out.writeUTF("CLIENT");
+                out.writeUTF("USER");
                 out.flush();
-                System.out.println("Choose: Manager/Client");
+                System.out.println("Choose: Manager/Client/Exit");
                 Type = scanner.nextLine();
 
                 if (Type.equals("Manager")) {
@@ -50,14 +50,9 @@ public class Dummy_User extends Thread {
                         System.out.println("Provide any letter.");
 
                     }else if (answer.equalsIgnoreCase("Exit")) {
-                        System.out.println("Closing this connection : " + socket);
-                        out.writeUTF("exit");
-                        socket.close();
-                        System.out.println("Connection closed");
-                        //  break;
-                }
-
-
+                        exit(out, socket);
+                        break;
+                    }
                 } else if (Type.equals("Client")) {
                     out.writeUTF("Client");
                     System.out.println("1)Filter Rooms.\n2)Book a room.\n3)Rate a room.\nExit");
@@ -79,13 +74,14 @@ public class Dummy_User extends Thread {
                         System.out.println("E.G. Semeli,5");
                         RoomDetails = scanner.nextLine();
 
+                    }else if (answer.equalsIgnoreCase("Exit")) {
+                        exit(out, socket);
+                        break;
                     }
-                } else if (answer.equalsIgnoreCase("Exit")) {
-                    System.out.println("Closing this connection : " + socket);
-                    out.writeUTF("exit");
-                    socket.close();
-                    System.out.println("Connection closed");
-                  //  break;
+
+                }else if (Type.equalsIgnoreCase("Exit")) {
+                    exit(out, socket);
+                    break;
                 }
 
                 out.flush(); // out type
@@ -101,10 +97,13 @@ public class Dummy_User extends Thread {
                         
                             @SuppressWarnings("unchecked")
                             Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) resultInput.readObject();
-                           
-                            System.out.println("Received resultsss: " + result.getValue().get(0).getRoomName() +" "+ result.getValue().get(0).getStars());
-                            System.out.println("Received resultsss: "  + result.getValue().get(1).getRoomName() +" "+ result.getValue().get(1).getStars());
-                    
+                            List<Room> finalrooms = result.getValue();
+                            System.out.println("\nResults:" + finalrooms.size()+ "\n");
+                            for (Room room : finalrooms){
+                                Room.showRoom(room);
+                                System.out.println();
+                            }
+
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -138,10 +137,18 @@ public class Dummy_User extends Thread {
         }
     }
 	
+    public void exit(ObjectOutputStream out,Socket socket) throws IOException{
+        System.out.println("Closing this connection : " + socket);
+        out.writeUTF("exit");
+        socket.close();
+        System.out.println("Connection closed");
+    }
 
 	public static void main(String args[]) {
 		new Dummy_User().start();
 	}
+
+
 }
 
 

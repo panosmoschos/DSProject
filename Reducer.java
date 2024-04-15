@@ -8,14 +8,10 @@ import java.net.Socket;
 public class Reducer {
     private int port;
     private List<Pair<Integer, List<Room>>> results;
-    private Map<Integer, Integer> requestCountMap;
-    private final static Object lock = new Object();
-    
 
     public Reducer(int port) {
         this.port = port;
         this.results = new ArrayList<>();
-        this.requestCountMap = new HashMap<>();
     }
 
     public void start() {
@@ -49,37 +45,34 @@ public class Reducer {
                 int count=0;
 
                 synchronized(results){
-                results.add(result);//add the result in the results list
 
-                for (Pair<Integer, List<Room>> res : results){
-                    if(tempkey == res.getKey()){
-                        count ++;
-                    }
-                }
-                System.out.println(results);
-                }
-                if (count == 3) {//if you find 3 results with the same userid, reduce them and delete them!
-                    Pair<Integer, List<Room>> finalResult = reduceForUserId(tempkey);
+                    results.add(result);//add the result in the results list
 
-                    synchronized (results) {
-                        Iterator<Pair<Integer, List<Room>>> iterator = results.iterator();
-                        while (iterator.hasNext()) {
-                            Pair<Integer, List<Room>> res = iterator.next();
-                            if (tempkey == res.getKey()) {
-                                iterator.remove();
-                            }
+                    for (Pair<Integer, List<Room>> res : results){
+                        if(tempkey == res.getKey()){
+                            count ++;
                         }
                     }
-                    synchronized(finalResult){
-                    System.out.println(finalResult.getValue().get(0).getRoomName());
-                    System.out.println(finalResult.getValue().get(1).getRoomName());
-                    System.out.println(finalResult.getKey());
+                    //System.out.println(results);
+
+                    if (count == 3) {//if you find 3 results with the same userid, reduce them and delete them!
+                        Pair<Integer, List<Room>> finalResult = reduceForUserId(tempkey);
+    
+                        synchronized (results) {
+                            Iterator<Pair<Integer, List<Room>>> iterator = results.iterator();
+                            while (iterator.hasNext()) {
+                                Pair<Integer, List<Room>> res = iterator.next();
+                                if (tempkey == res.getKey()) {
+                                    iterator.remove();
+                                }
+                            }
+                        }
+                     
+                        // Send the final result to the Master
+                        sendResultToMaster(finalResult);
                     }
-                    // Send the final result to the Master
-                    sendResultToMaster(finalResult);
+
                 }
-                
-               
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

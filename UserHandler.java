@@ -43,8 +43,8 @@ public class UserHandler extends Thread {
             }
 
             try {
-                // Make the current thread sleep for 5 seconds
-                Thread.sleep(5000); // Sleep for 5 seconds (5000 milliseconds)
+                // Make the current thread sleep for 1 second
+                Thread.sleep(1000); // Sleep for 1 second (1000 milliseconds)
             } catch (InterruptedException e) {
                 // Handle the interruption if needed
                 e.printStackTrace();

@@ -51,6 +51,20 @@ public class Room implements Serializable {
     public int getStars(){
         return stars;
     }
+    public int getNoPerson(){
+        return noOfPersons;
+    }
+
+    public int getNoReviews(){
+        return noOfReviews;
+    }
+    public int getPrice(){
+        return price;
+    }
+
+    public String getImage(){
+        return roomImage;
+    }
 
 
     // (Client) Adds booking
@@ -335,11 +349,24 @@ public class Room implements Serializable {
         return rooms;
     }
 
+    public static void showRoom(Room room) {
+        System.out.println("Room Name: " + room.getRoomName() +
+                           "\nNo. of Persons: " + room.getNoPerson() +
+                           "\nArea: " + room.getArea(room) +
+                           "\nStars: " + room.getStars() +
+                           "\nNo. of Reviews: " + room.getNoReviews() +
+                           "\nRoom Image: /usr/bin/images/Anatoli.png" +
+                           "\nPrice: " + room.getPrice() +
+                           "\nAvailability: " + room.getAvailability() +
+                           "\nOwner: " + Room.getOwner(room));
+    }
+    
+
 
     // TESTING
     public static void main(String[] args) {
-        String folderPath = "bin/rooms";
-        List<Room> rooms = roomsOfFolder(folderPath);
+        //String folderPath = "bin/rooms";
+        //List<Room> rooms = roomsOfFolder(folderPath);
 
         /* TESTING addAvailability 
 

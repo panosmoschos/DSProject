@@ -72,7 +72,7 @@ public class Worker extends Thread {
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
                     room.addBooking(request);
-                    continue;
+                    break;
                 }
             }
         }
@@ -85,7 +85,7 @@ public class Worker extends Thread {
                 if (room.getRoomName().equals(roomname)){
                     room.ratingChanges(request);
                     System.out.println(room.getStars());
-                    continue; // giati oxi break??
+                    break;
                 }
             }
         }
