@@ -17,7 +17,6 @@ public class Dummy_User extends Thread {
         ObjectInputStream in = null;
         String answer = "";
         String RoomDetails = "";
-        String path = "";
 
         try {
             while (true) {
@@ -35,17 +34,20 @@ public class Dummy_User extends Thread {
 
                 if (Type.equals("Manager")) {
                     out.writeUTF("Manager");
-                    System.out.println("1)Add Room.\n2)Add available dates.\n3)Show reservations.\nExit");
+                    System.out.println("1)Add Room.\n2)Add available dates.\n3)Show reservations\n4)Show bookings per area.\nExit");
                     answer = scanner.nextLine();
                     if(answer.equals("1")){
-                        System.out.println("Provide the path of the room.");
-                        path = scanner.nextLine();
+                        System.out.println("Provide the name of the room and the path of the JSON file.");
 
                     }else if(answer.equals("2")){
-                        System.out.println("Provide the name of the room and the dates you want to add.");
+                        System.out.println("Provide the name of the room and the dates you want to add (first and last day for each one).");
+                        System.out.println("E.G. Anatoli,2024/06/06,2024/06/06");
 
                     }else if(answer.equals("3")){
                         System.out.println("Provide your name.");
+
+                    }else if(answer.equals("4")){
+                        System.out.println("Provide any letter.");
 
                     }else if (answer.equalsIgnoreCase("Exit")) {
                         System.out.println("Closing this connection : " + socket);
@@ -68,11 +70,13 @@ public class Dummy_User extends Thread {
                         RoomDetails = scanner.nextLine();
                         
                     }else if(answer.equals("2")){
-                        System.out.println("Name of the room you want to book, dates?");
+                        System.out.println("Provide the name of the room you want to book, the first day of your stay and the last day of your stay.");
+                        System.out.println("E.G. Thalassi Room,2024/06/08,2024/06/09");
                         RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("3")){
-                        System.out.println("Name of the room you want to rate, rating?");
+                        System.out.println("Provide the name of the room you want to rate and your rating.");
+                        System.out.println("E.G. Semeli,5");
                         RoomDetails = scanner.nextLine();
 
                     }

@@ -55,6 +55,8 @@ public class Worker extends Thread {
         // Εδώ γίνεται η επεξεργασία του αιτήματος
         //System.out.println("WorkerThread processing request: " + request);
 
+        // CLIENT 
+
         //Filtering 
         if (request.function.equals("1")){
             Pair<Integer, List<Room>> result = map(key, request);
@@ -67,10 +69,9 @@ public class Worker extends Thread {
         if (request.function.equals("2")){
             String[] details = request.details.split(",");
             String roomname = details[0];
-            String dates = details[1];
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
-                   // room.addBooking(dates); //NEEDS IMPLEMENTATION! IN ROOM.JAVA
+                    room.addBooking(request);
                     continue;
                 }
             }
@@ -84,19 +85,71 @@ public class Worker extends Thread {
                 if (room.getRoomName().equals(roomname)){
                     room.ratingChanges(request);
                     System.out.println(room.getStars());
-                    continue;
+                    continue; // giati oxi break??
                 }
             }
         }
 
+        // MANAGER - Add room (????)
+        // pou kserei oti prepei na mpei edw to room?? 
+        if (request.type.equals("Manager") && request.function.equals("1")){
+            List<Room> newRooms = new ArrayList<>();
+            newRooms = Room.addRooms(request);
+            for (Room room: newRooms){
+                assignedRooms.add(room);
+            }
+        }
+
+        // MANAGER - Add availability
+        if (request.type.equals("Manager") && request.function.equals("2")){
+            String[] details = request.details.split(",");
+            String roomname = details[0];
+            for (Room room : assignedRooms){
+                if (room.getRoomName().equals(roomname)){
+                    room.addAvailability(request);
+                    break;
+                }
+            }
+        }
+
+        // MANAGER - Gather bookings of owner (????)
+        if (request.type.equals("Manager") && request.function.equals("3")){
+            List<Booking> bookings = new ArrayList<>();
+            for (Room room : assignedRooms){
+                bookings = room.getOwnerBookings(request);
+            }
+
+            // kapou prepei na gyrnaei ta bookings wste na mazeutoun ola k na typwthoun
+            /* kwdikas gia typwma bookings
+            for (Booking b : bookings){
+                b.ShowBooking();
+            }
+            */
+            
+        }
+
+        
+        // MANAGER - Gather bookings by area (????)
+        if (request.type.equals("Manager") && request.function.equals("4")){
+            List<Booking> bookings = new ArrayList<>();
+            for (Room room : assignedRooms){
+                bookings = room.getAreaBookingsBetween(request);
+            }
+
+            // kapou prepei na gyrnaei ta bookings wste na mazeutoun ola k na typwthoun
+            /* kwdikas gia typwma bookings by area
+                Booking.showBookingsByArea(bookings);
+            */
+            
+        }
         
     
     }
 }
      
 
-      // Method to assign a room to the worker
-      public void assignRoom(Room room) {
+    // Method to assign a room to the worker
+    public void assignRoom(Room room) {
         assignedRooms.add(room);
     }
 
