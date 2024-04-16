@@ -60,7 +60,7 @@ public class Master {
                 } else {
                     System.out.println("New USER connection: " + socket);
                     portSockets.put(socket.getPort(), socket);
-                    new UserHandler(socket, workers, inputStream).start();
+                    new UserHandler(socket, workerPorts, inputStream).start();
                 }
             }
         } catch (IOException e) {

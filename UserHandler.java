@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 //import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UserHandler extends Thread {
     private Socket connection;
@@ -9,11 +10,13 @@ public class UserHandler extends Thread {
     private ObjectOutputStream out;
     private List<Worker> workers;
     private int userid;
+    private Map<Integer, Integer> workerPorts;
 
-    public UserHandler(Socket connection,List<Worker> workers, ObjectInputStream inputStream) throws IOException {
+    public UserHandler(Socket connection, Map<Integer, Integer> workerPorts, ObjectInputStream inputStream) throws IOException {
         this.connection = connection;
-        this.workers = workers;
+       // this.workers = workers;
         this.in = inputStream;
+        this.workerPorts = workerPorts;
         
     }
 
@@ -27,19 +30,29 @@ public class UserHandler extends Thread {
                 userid = connection.getPort();
                 Request newrequest = new Request(type, function, FilterDetails,userid);
 
-               // Στέλνουμε το αίτημα σε κάθε Worker
-                for (Worker worker : workers) {
-                    try {
-                        Socket socket = new Socket("localhost", worker.getPort());
-                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                        out.writeObject(newrequest); // Αποστολή του αιτήματος
-                        out.flush();
-                        out.close();
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                if (function.equals("1")){ //Filtering
+                    // Στέλνουμε το αίτημα σε κάθε Worker
+                    for (Map.Entry<Integer, Integer> entry : workerPorts.entrySet()) {
+                        int workerId = entry.getKey();
+                        int port = entry.getValue();
+
+                        try {
+                            Socket socket = new Socket("localhost", port); //Needs setting if workers are on different hosts!!
+                            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                            out.writeObject(newrequest);
+                            out.flush();
+                            out.close();
+                            socket.close();
+                            System.out.println("Sent request to Worker " + workerId);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                }else if(function.equals("2")){//Rating
+                    String[] details = FilterDetails.split(",");
+                    String roomname = details[0];
                 }
+                
             }
 
             try {

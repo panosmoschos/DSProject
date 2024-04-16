@@ -38,16 +38,20 @@ public class Dummy_User extends Thread {
                     answer = scanner.nextLine();
                     if(answer.equals("1")){
                         System.out.println("Provide the name of the room and the path of the JSON file.");
+                        RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("2")){
                         System.out.println("Provide the name of the room and the dates you want to add (first and last day for each one).");
                         System.out.println("E.G. Anatoli,2024/06/06,2024/06/06");
+                        RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("3")){
                         System.out.println("Provide your name.");
+                        RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("4")){
                         System.out.println("Provide any letter.");
+                        RoomDetails = scanner.nextLine();
 
                     }else if (answer.equalsIgnoreCase("Exit")) {
                         exit(out, socket);
