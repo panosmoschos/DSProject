@@ -62,7 +62,6 @@ public class Reducer {
                         isBooking = true;
                     }
                 }else{
-
                     synchronized(results){
                         results.add(new Pair<Integer,List<Room>>(tempkey,(List<Room>) value));
                         count1++;

@@ -66,67 +66,105 @@ public class Worker extends Thread {
     }
 
     public void run() {
-      
-        // CLIENT 
 
-        //Filtering 
+        // Client - Filtering 
         if (request.function.equals("1") && request.type.equals("Client")){
             Pair<Integer, List<Room>> result = map(key, request);
             sendResultsToReducer(result);
         }
         
-        //Booking
+        // Client - Booking
         if (request.function.equals("2") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
+            //int bookingsBefore = 0;
+            //int bookingsAfter = 0;
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
+                    //bookingsBefore= room.getNumberOfBookings();
                     room.addBooking(request);
+                    //bookingsAfter = room.getNumberOfBookings();
+
+                    /* 
+                    if (bookingsBefore == bookingsAfter){
+                        // emfanise to ston user
+                    }
+                    */
+                    
                     break;
                 }
             }
         }
 
-        //Rating
+        // Client - Rating
         if (request.function.equals("3") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
+            //int reviewsBefore = 0;
+            //int reviewsAfter = 0;
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
+                    //reviewsBefore = room.getNoReviews();
                     room.ratingChanges(request);
+                    //reviewsAfter = room.getNoReviews();
+
+                    /*
+                    if (reviewsBefore == reviewsAfter){
+                        // emfanise to ston user
+                    }
+                    */
+
                     break;
                 }
             }
         }
 
-        // MANAGER - Add room (????)
-        // pou kserei oti prepei na mpei edw to room?? 
+
+        // Manager - Add room
         if (request.type.equals("Manager") && request.function.equals("1")){
             Room newRoom = Room.addRoom(request);
+           // int numberOfRoomsBefore = assignedRooms.size();
             assignedRooms.add(newRoom);
+            //int numberOfRoomsAfter = assignedRooms.size();
+            
+            /* 
+            if (numberOfRoomsBefore == numberOfRoomsAfter){
+                // emfanise to ston user
+            }
+            */
         }
 
-        // MANAGER - Add availability
+        // Manager - Add availability
         if (request.type.equals("Manager") && request.function.equals("2")){
             String[] details = request.details.split(",");
             String roomname = details[0];
+            //int daysBefore = 0;
+            //int daysAfter = 0;
             for (Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
+                    //daysBefore = Available_Date.DaysAvailable(room.getAvailability());
                     room.addAvailability(request);
+                    //daysAfter = Available_Date.DaysAvailable(room.getAvailability());
+                    
+                    /* 
+                    if (daysBefore == daysAfter){
+                        // emfanise to ston user
+                    }
+                    */
+                    
                     break;
                 }
             }
         }
 
-        // MANAGER - Gather bookings of owner (????)
+        // Manager - Gather bookings of owner
         if (request.type.equals("Manager") && request.function.equals("3")){
             Pair<Integer, List<Booking>> result = mapbookings(key, request);
             sendOwnerBookingsToReducer(result);
             
         }
 
-        
-        // MANAGER - Gather bookings by area (????)
+        // Manager - Gather bookings by area
         if (request.type.equals("Manager") && request.function.equals("4")){
             Pair<Integer, List<Booking>> result = mapbookingsByArea(key, request);
             sendOwnerBookingsToReducer(result);

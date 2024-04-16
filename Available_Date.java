@@ -196,6 +196,16 @@ public class Available_Date implements Serializable{
         return "From: " + df.format(FirstDay) + " To: " + df.format(LastDay);
     }
 
+    public static int DaysAvailable(List<Available_Date> li){
+        int days = 0;
+        for (Available_Date date : li){
+            while (!date.FirstDay.isEqual(date.LastDay)){
+                days++;
+            }
+        }
+        return days;
+    }
+
     public static void main(String[] args) {
         LocalDate m = LocalDate.of(2022,07,22);
         LocalDate n = LocalDate.of(2022,7,29);

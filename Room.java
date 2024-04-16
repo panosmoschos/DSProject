@@ -66,6 +66,10 @@ public class Room implements Serializable {
         return roomImage;
     }
 
+    public int getNumberOfBookings(){
+        return bookings.size();
+    }
+
 
 
     // (Client) Adds booking
