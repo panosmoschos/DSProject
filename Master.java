@@ -8,6 +8,8 @@ public class Master {
     private static List<Worker> workers = new ArrayList<>();
     private static List<Room> rooms = new ArrayList<>();
     private static Map<Integer, Socket> portSockets = new HashMap<>();
+    private static Map<Integer, Integer> workerPorts = new HashMap<>(); // Map to store worker ports
+
     
 
     public static void main(String[] args) {
@@ -16,18 +18,26 @@ public class Master {
         String folderPath = "bin/rooms";
         rooms = Room.roomsOfFolder(folderPath);
 
+        // Specify the ports for each worker
+        int[] ports = {8000, 8001, 8002};
+        for (int i = 0; i < NUM_WORKERS; i++) {
+            workerPorts.put(i, ports[i]); // Store worker ports
+        }
+
         //Start the Master Server.
         try (ServerSocket serverSocket = new ServerSocket(12345)) {
             System.out.println("Master Server started...");
 
-            int[] ports = {8000, 8001, 8002};
-            for (int i = 0; i < NUM_WORKERS; i++) {
+            // Send rooms to workers
+            sendRoomsToWorkers(rooms);
+                
+            /*for (int i = 0; i < NUM_WORKERS; i++) {
                 Worker worker = new Worker(i,ports[i]);
                 workers.add(worker);
                 worker.start();
-            }
+            }*/
 
-            int numRooms = rooms.size();
+            /*int numRooms = rooms.size();
             int workerIndex = 0;
             for (int i = 0; i < numRooms; i++) {
                 Room room = rooms.get(i);
@@ -37,7 +47,7 @@ public class Master {
             }
 
             // Hashing and assigning the starting rooms to the workers
-            //addRooms(folderPath);
+            addRooms(rooms);*/
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -70,7 +80,6 @@ public class Master {
             }
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }return false;
     }
@@ -84,12 +93,42 @@ public class Master {
         return hash;
     }
 
-    /*private static void addRooms(String givenPath) { // distributing room(s) to workers 
-        rooms = Room.roomsOfFolder(givenPath);
+    private static void addRooms(List<Room>rooms) { // distributing room(s) to workers 
         for (Room room : rooms) {
             int workerID = hash(room.getRoomName()) % NUM_WORKERS;                
             Worker worker = workers.get(workerID);
             worker.assignRoom(room);
         }
-    }*/
+    }
+
+    private static void sendRoomsToWorkers(List<Room> rooms) {
+        // Distribute rooms among workers
+        for (Map.Entry<Integer, Integer> entry : workerPorts.entrySet()) {
+            int workerId = entry.getKey();
+            int port = entry.getValue();
+    
+            // Get the subset of rooms assigned to this worker
+            List<Room> workerRooms = getWorkerRooms(workerId, rooms);
+    
+            try (Socket socket = new Socket("localhost", port);
+                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
+    
+                // Send rooms to worker
+                outputStream.writeObject(workerRooms);
+                System.out.println("Sent rooms to Worker " + workerId);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static List<Room> getWorkerRooms(int workerId, List<Room> allRooms) {
+        List<Room> workerRooms = new ArrayList<>();
+        for (Room room : allRooms) {
+            if (hash(room.getRoomName()) % NUM_WORKERS == workerId) {
+                workerRooms.add(room);
+            }
+        }
+        return workerRooms;
+    }
 }

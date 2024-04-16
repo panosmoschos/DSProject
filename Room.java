@@ -355,7 +355,7 @@ public class Room implements Serializable {
                            "\nArea: " + room.getArea(room) +
                            "\nStars: " + room.getStars() +
                            "\nNo. of Reviews: " + room.getNoReviews() +
-                           "\nRoom Image: /usr/bin/images/Anatoli.png" +
+                           "\nRoom Image:" + room.getImage() +
                            "\nPrice: " + room.getPrice() +
                            "\nAvailability: " + room.getAvailability() +
                            "\nOwner: " + Room.getOwner(room));

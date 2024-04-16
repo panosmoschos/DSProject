@@ -15,11 +15,18 @@ public class Worker extends Thread {
         this.assignedRooms = new ArrayList<>();
     }
     
+    @SuppressWarnings("unchecked")
     public void run() {
         
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+
             System.out.println("Worker started" + port);
+
+            Socket mastersocket = serverSocket.accept();
+            in = new ObjectInputStream(mastersocket.getInputStream());//Read the rooms from master
+            assignedRooms = (List<Room>) in.readObject();
             System.out.println(assignedRooms);
+
             while (true) {
                 Socket userHandlersocket = serverSocket.accept();
                 System.out.println(userHandlersocket);
@@ -28,7 +35,6 @@ public class Worker extends Thread {
                 Request request = (Request) in.readObject();
                 int key = request.UserPort;
                 System.out.println("Worker " + id + " processing request: " + request);
-                
                 WorkerThread workerThread = new WorkerThread(request,key);
                 workerThread.start();
                 
@@ -170,6 +176,12 @@ public class Worker extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        int port = 8002;
+        Worker worker = new Worker(2, port);
+        worker.start();
     }
 }
 
