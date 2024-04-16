@@ -368,7 +368,7 @@ public class Room implements Serializable {
 
     // TESTING
     public static void main(String[] args) {
-        String folderPath = "bin/rooms/Anatoli.json";
+       // String folderPath = "bin/rooms/Anatoli.json";
 
         /* TESTING addAvailability 
 

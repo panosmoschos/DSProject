@@ -4,11 +4,11 @@ import java.net.Socket;
 import java.util.*;
 
 public class Master {
-    private static final int NUM_WORKERS = 3;
-    private static List<Worker> workers = new ArrayList<>();
+    public static final int NUM_WORKERS = 3;
     private static List<Room> rooms = new ArrayList<>();
     private static Map<Integer, Socket> portSockets = new HashMap<>();
     private static Map<Integer, Integer> workerPorts = new HashMap<>(); // Map to store worker ports
+    private static Map<Integer, String> workerHosts = new HashMap<>(); // Map to store worker host
 
     
 
@@ -18,10 +18,12 @@ public class Master {
         String folderPath = "bin/rooms";
         rooms = Room.roomsOfFolder(folderPath);
 
-        // Specify the ports for each worker
+        // Specify the port and host for each worker
         int[] ports = {8000, 8001, 8002};
+        String [] hosts = {"localhost","localhost","192.168.1.46"};
         for (int i = 0; i < NUM_WORKERS; i++) {
-            workerPorts.put(i, ports[i]); // Store worker ports
+            workerPorts.put(i, ports[i]); // Store worker port
+            workerHosts.put(i,hosts[i]); //Store worker host
         }
 
         //Start the Master Server.
@@ -30,24 +32,6 @@ public class Master {
 
             // Send rooms to workers
             sendRoomsToWorkers(rooms);
-                
-            /*for (int i = 0; i < NUM_WORKERS; i++) {
-                Worker worker = new Worker(i,ports[i]);
-                workers.add(worker);
-                worker.start();
-            }*/
-
-            /*int numRooms = rooms.size();
-            int workerIndex = 0;
-            for (int i = 0; i < numRooms; i++) {
-                Room room = rooms.get(i);
-                Worker worker = workers.get(workerIndex);
-                worker.assignRoom(room);
-                workerIndex = (workerIndex + 1) % NUM_WORKERS;
-            }
-
-            // Hashing and assigning the starting rooms to the workers
-            addRooms(rooms);*/
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -60,7 +44,7 @@ public class Master {
                 } else {
                     System.out.println("New USER connection: " + socket);
                     portSockets.put(socket.getPort(), socket);
-                    new UserHandler(socket, workerPorts, inputStream).start();
+                    new UserHandler(socket, workerPorts, workerHosts, inputStream).start();
                 }
             }
         } catch (IOException e) {
@@ -68,8 +52,8 @@ public class Master {
         }
     }
 
-    
-    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {//Checks if the new connection is from a new user of the reducer.
+    //Checks if the new connection is from a new user of the reducer.
+    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {
        
        try {
             String type = inputStream.readUTF();
@@ -93,12 +77,8 @@ public class Master {
         return hash;
     }
 
-    private static void addRooms(List<Room>rooms) { // distributing room(s) to workers 
-        for (Room room : rooms) {
-            int workerID = hash(room.getRoomName()) % NUM_WORKERS;                
-            Worker worker = workers.get(workerID);
-            worker.assignRoom(room);
-        }
+    public static String getHost(Map<Integer, String> workerHosts, int workerID){
+        return workerHosts.get(workerID);
     }
 
     private static void sendRoomsToWorkers(List<Room> rooms) {
@@ -106,11 +86,12 @@ public class Master {
         for (Map.Entry<Integer, Integer> entry : workerPorts.entrySet()) {
             int workerId = entry.getKey();
             int port = entry.getValue();
+            String host = getHost(workerHosts, workerId);
     
             // Get the subset of rooms assigned to this worker
             List<Room> workerRooms = getWorkerRooms(workerId, rooms);
     
-            try (Socket socket = new Socket("localhost", port);
+            try (Socket socket = new Socket(host, port); //need SETTING if workers are on different hosts!!
                  ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
     
                 // Send rooms to worker

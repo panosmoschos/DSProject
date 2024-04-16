@@ -1,20 +1,18 @@
 import java.io.*;
 import java.net.*;
-//import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class UserHandler extends Thread {
     private Socket connection;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private List<Worker> workers;
     private int userid;
     private Map<Integer, Integer> workerPorts;
+    private Map<Integer, String> workerHosts;
 
-    public UserHandler(Socket connection, Map<Integer, Integer> workerPorts, ObjectInputStream inputStream) throws IOException {
+    public UserHandler(Socket connection, Map<Integer, Integer> workerPorts, Map<Integer, String> workerHosts, ObjectInputStream inputStream) throws IOException {
         this.connection = connection;
-       // this.workers = workers;
+        this.workerHosts = workerHosts;
         this.in = inputStream;
         this.workerPorts = workerPorts;
         
@@ -30,14 +28,15 @@ public class UserHandler extends Thread {
                 userid = connection.getPort();
                 Request newrequest = new Request(type, function, FilterDetails,userid);
 
-                if (function.equals("1")){ //Filtering
-                    // Στέλνουμε το αίτημα σε κάθε Worker
+                if (function.equals("1")){      //Filtering
+                    //Send the request to all workers.
                     for (Map.Entry<Integer, Integer> entry : workerPorts.entrySet()) {
                         int workerId = entry.getKey();
                         int port = entry.getValue();
+                        String host = Master.getHost(workerHosts, workerId);
 
                         try {
-                            Socket socket = new Socket("localhost", port); //Needs setting if workers are on different hosts!!
+                            Socket socket = new Socket(host, port); //Needs SETTING if workers are on different hosts!!
                             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                             out.writeObject(newrequest);
                             out.flush();
@@ -48,16 +47,34 @@ public class UserHandler extends Thread {
                             e.printStackTrace();
                         }
                     }
-                }else if(function.equals("2")){//Rating
+
+                }else if(function.equals("2") || function.equals("3") ){    //Booking and Rating
                     String[] details = FilterDetails.split(",");
                     String roomname = details[0];
+                    //Send the request only to the worker that has the room. 
+                    int workerID =  Master.hash(roomname) % Master.NUM_WORKERS;
+                    int workerport = workerPorts.get(workerID);
+                    String host = Master.getHost(workerHosts, workerID);
+
+                    try {
+                        Socket socket = new Socket(host, workerport); //Needs SETTIING if workers are on different hosts!!
+                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                        out.writeObject(newrequest);
+                        out.flush();
+                        out.close();
+                        socket.close();
+                        System.out.println("Sent request to Worker " + workerID);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 
             }
 
             try {
                 // Make the current thread sleep for 1 second
-                Thread.sleep(1000); // Sleep for 1 second (1000 milliseconds)
+                Thread.sleep(5000); // Sleep for 1 second (1000 milliseconds)
             } catch (InterruptedException e) {
                 // Handle the interruption if needed
                 e.printStackTrace();

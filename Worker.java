@@ -7,12 +7,21 @@ import java.util.List;
 public class Worker extends Thread {
     private ObjectInputStream in;
     private int id,port;
+    private String host;
     private List<Room> assignedRooms;
     
-    public Worker(int id,int port) {
+    public Worker(int id,int port, String host) {
         this.id = id;
         this.port = port;
+        this.host = host;
         this.assignedRooms = new ArrayList<>();
+    }
+
+    public static void main(String[] args) {
+        int port = 8001;
+        String host = "localhost";
+        Worker worker = new Worker(1, port, host);
+        worker.start();
     }
     
     @SuppressWarnings("unchecked")
@@ -20,7 +29,7 @@ public class Worker extends Thread {
         
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-            System.out.println("Worker started" + port);
+            System.out.println("Worker started " + port + " " + host);
 
             Socket mastersocket = serverSocket.accept();
             in = new ObjectInputStream(mastersocket.getInputStream());//Read the rooms from master
@@ -29,7 +38,6 @@ public class Worker extends Thread {
 
             while (true) {
                 Socket userHandlersocket = serverSocket.accept();
-                System.out.println(userHandlersocket);
                 in = new ObjectInputStream(userHandlersocket.getInputStream());
                 // Read the request object from the socket
                 Request request = (Request) in.readObject();
@@ -58,21 +66,17 @@ public class Worker extends Thread {
     }
 
     public void run() {
-        // Εδώ γίνεται η επεξεργασία του αιτήματος
-        //System.out.println("WorkerThread processing request: " + request);
-
+      
         // CLIENT 
 
         //Filtering 
-        if (request.function.equals("1")){
+        if (request.function.equals("1") && request.type.equals("Client")){
             Pair<Integer, List<Room>> result = map(key, request);
             sendResultsToReducer(result);
-            System.out.println(result.getKey());
-            System.out.println(result.getValue());
         }
         
         //Booking
-        if (request.function.equals("2")){
+        if (request.function.equals("2") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
             for ( Room room : assignedRooms){
@@ -84,13 +88,12 @@ public class Worker extends Thread {
         }
 
         //Rating
-        if (request.function.equals("3")){
+        if (request.function.equals("3") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
                     room.ratingChanges(request);
-                    System.out.println(room.getStars());
                     break;
                 }
             }
@@ -99,11 +102,8 @@ public class Worker extends Thread {
         // MANAGER - Add room (????)
         // pou kserei oti prepei na mpei edw to room?? 
         if (request.type.equals("Manager") && request.function.equals("1")){
-            List<Room> newRooms = new ArrayList<>();
-            newRooms = Room.addRooms(request);
-            for (Room room: newRooms){
-                assignedRooms.add(room);
-            }
+            Room newRoom = Room.addRoom(request);
+            assignedRooms.add(newRoom);
         }
 
         // MANAGER - Add availability
@@ -178,11 +178,7 @@ public class Worker extends Thread {
         }
     }
 
-    public static void main(String[] args) {
-        int port = 8002;
-        Worker worker = new Worker(2, port);
-        worker.start();
-    }
+ 
 }
 
 
