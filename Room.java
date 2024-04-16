@@ -36,7 +36,7 @@ public class Room implements Serializable {
         return availability;
     }
 
-    public static String getOwner(Room room){
+    public String getOwner(Room room){
         return room.owner;
     }
 
@@ -65,6 +65,7 @@ public class Room implements Serializable {
     public String getImage(){
         return roomImage;
     }
+
 
 
     // (Client) Adds booking
@@ -300,53 +301,52 @@ public class Room implements Serializable {
 
 
     // (Client) Reads and returns a list of rooms from a path
-    public static List<Room> addRooms(Request req) {
+    public static Room addRoom(Request req) {
         String[] details = req.details.split(",");
         String path = details[1];
-        File dir = new File(path);
-        File[] files = dir.listFiles();
+        File f = new File(path);
 
-        List<Room> rooms = new ArrayList<>();
+        Room room = new Room("x", 0, path, 0, 0, path, 0, null, path);
 
-        for (File f : files){
-            try {
-                JSONParser parser = new JSONParser();
-                Object obj = parser.parse(new FileReader(f));
-                JSONObject JSONobj= (JSONObject) obj;
+        try {
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(new FileReader(f));
+            JSONObject JSONobj= (JSONObject) obj;
 
-                String roomName = (String) JSONobj.get("roomName");
-                int noOfPersons = ((Long) JSONobj.get("noOfPersons")).intValue();
-                String area = (String) JSONobj.get("area");
-                int stars = ((Long) JSONobj.get("stars")).intValue();
-                int noOfReviews = ((Long) JSONobj.get("noOfReviews")).intValue();
-                String roomImage = (String) JSONobj.get("roomImage");
-                int price = ((Long) JSONobj.get("price")).intValue();
-                String owner = (String) JSONobj.get("owner");
+            String roomName = (String) JSONobj.get("roomName");
+            int noOfPersons = ((Long) JSONobj.get("noOfPersons")).intValue();
+            String area = (String) JSONobj.get("area");
+            int stars = ((Long) JSONobj.get("stars")).intValue();
+            int noOfReviews = ((Long) JSONobj.get("noOfReviews")).intValue();
+            String roomImage = (String) JSONobj.get("roomImage");
+            int price = ((Long) JSONobj.get("price")).intValue();
+            String owner = (String) JSONobj.get("owner");
 
-                List<Available_Date> dates = new ArrayList<>();
+            List<Available_Date> dates = new ArrayList<>();
 
-                JSONArray available_dates = (JSONArray) JSONobj.get("availability");
-                for (Object Obj : available_dates){
-                    JSONObject jsonOB = (JSONObject) Obj;
-                    String FirstDayString = (String) jsonOB.get("start_date");
-                    String LastDayString = (String) jsonOB.get("end_date");
+            JSONArray available_dates = (JSONArray) JSONobj.get("availability");
+            for (Object Obj : available_dates){
+                JSONObject jsonOB = (JSONObject) Obj;
+                String FirstDayString = (String) jsonOB.get("start_date");
+                String LastDayString = (String) jsonOB.get("end_date");
                     
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-                    LocalDate FirstDayDate = LocalDate.parse(FirstDayString,df);  
-                    LocalDate LastDayDate =  LocalDate.parse(LastDayString,df);
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+                LocalDate FirstDayDate = LocalDate.parse(FirstDayString,df);  
+                LocalDate LastDayDate =  LocalDate.parse(LastDayString,df);
                     
 
-                    dates.add(new Available_Date(FirstDayDate,LastDayDate));
-                }
+                dates.add(new Available_Date(FirstDayDate,LastDayDate));
+            }
 
-                Room room = new Room(roomName, noOfPersons, area, stars, noOfReviews, roomImage, price, dates, owner);
-                rooms.add(room);
+            room = new Room(roomName, noOfPersons, area, stars, noOfReviews, roomImage, price, dates, owner);
 
-            }catch (Exception e){
-                System.out.println("Exception:" + e);
-            }   
-        }
-        return rooms;
+
+        }catch (Exception e){
+            System.out.println("Exception:" + e);
+        }   
+        
+        showRoom(room);
+        return room;
     }
 
     public static void showRoom(Room room) {
@@ -357,16 +357,18 @@ public class Room implements Serializable {
                            "\nNo. of Reviews: " + room.getNoReviews() +
                            "\nRoom Image:" + room.getImage() +
                            "\nPrice: " + room.getPrice() +
-                           "\nAvailability: " + room.getAvailability() +
-                           "\nOwner: " + Room.getOwner(room));
+                           "\nAvailability: ");
+        for (Available_Date ad : room.getAvailability()){
+            System.out.println("\t" + ad.getTimePeriod());
+        }
+        System.out.println("Owner: " + room.getOwner(room));
     }
     
 
 
     // TESTING
     public static void main(String[] args) {
-        //String folderPath = "bin/rooms";
-        //List<Room> rooms = roomsOfFolder(folderPath);
+        String folderPath = "bin/rooms/Anatoli.json";
 
         /* TESTING addAvailability 
 
