@@ -36,7 +36,7 @@ public class Room implements Serializable {
         return availability;
     }
 
-    public static String getOwner(Room room){
+    public String getOwner(Room room){
         return room.owner;
     }
 
@@ -65,6 +65,7 @@ public class Room implements Serializable {
     public String getImage(){
         return roomImage;
     }
+
 
 
     // (Client) Adds booking
@@ -357,8 +358,11 @@ public class Room implements Serializable {
                            "\nNo. of Reviews: " + room.getNoReviews() +
                            "\nRoom Image:" + room.getImage() +
                            "\nPrice: " + room.getPrice() +
-                           "\nAvailability: " + room.getAvailability() +
-                           "\nOwner: " + Room.getOwner(room));
+                           "\nAvailability: ");
+        for (Available_Date ad : room.getAvailability()){
+            System.out.println("\t" + ad.getTimePeriod());
+        }
+        System.out.println("Owner: " + room.getOwner(room));
     }
     
 
