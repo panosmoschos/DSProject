@@ -18,9 +18,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8001;
+        int port = 8002;
         String host = "localhost";
-        Worker worker = new Worker(1, port, host);
+        Worker worker = new Worker(2, port, host);
         worker.start();
     }
     
@@ -120,36 +120,18 @@ public class Worker extends Thread {
 
         // MANAGER - Gather bookings of owner (????)
         if (request.type.equals("Manager") && request.function.equals("3")){
-            List<Booking> bookings = new ArrayList<>();
-            for (Room room : assignedRooms){
-                bookings = room.getOwnerBookings(request);
-            }
-
-            // kapou prepei na gyrnaei ta bookings wste na mazeutoun ola k na typwthoun
-            /* kwdikas gia typwma bookings
-            for (Booking b : bookings){
-                b.ShowBooking();
-            }
-            */
+            Pair<Integer, List<Booking>> result = mapbookings(key, request);
+            sendOwnerBookingsToReducer(result);
             
         }
 
         
         // MANAGER - Gather bookings by area (????)
         if (request.type.equals("Manager") && request.function.equals("4")){
-            List<Booking> bookings = new ArrayList<>();
-            for (Room room : assignedRooms){
-                bookings = room.getAreaBookingsBetween(request);
-            }
-
-            // kapou prepei na gyrnaei ta bookings wste na mazeutoun ola k na typwthoun
-            /* kwdikas gia typwma bookings by area
-                Booking.showBookingsByArea(bookings);
-            */
-            
+            Pair<Integer, List<Booking>> result = mapbookingsByArea(key, request);
+            sendOwnerBookingsToReducer(result);
         }
-        
-    
+
     }
 }
      
@@ -169,6 +151,22 @@ public class Worker extends Thread {
         return new Pair<>(key, roomList);
     }
 
+    public Pair<Integer,List<Booking>> mapbookings(int key,Request value){
+        List<Booking> bookings = new ArrayList<>();
+        for (Room room : assignedRooms){
+            bookings = room.getOwnerBookings(value);
+        }
+        return new Pair<>(key,bookings);
+    }
+
+    public Pair<Integer,List<Booking>> mapbookingsByArea(int key,Request value){
+        List<Booking> bookings = new ArrayList<>();
+        for (Room room : assignedRooms){
+            bookings = room.getAreaBookingsBetween(value);
+        }
+        return new Pair<>(key,bookings);
+    }
+
     private void sendResultsToReducer(Pair<Integer, List<Room>> result) {
         try (Socket reducerSocket = new Socket("localhost", 23456);
             ObjectOutputStream out = new ObjectOutputStream(reducerSocket.getOutputStream())) {
@@ -178,6 +176,14 @@ public class Worker extends Thread {
         }
     }
 
+    private void sendOwnerBookingsToReducer(Pair<Integer, List<Booking>> result) {
+        try (Socket reducerSocket = new Socket("localhost", 23456);
+            ObjectOutputStream out = new ObjectOutputStream(reducerSocket.getOutputStream())) {
+            out.writeObject(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
  
 }
 

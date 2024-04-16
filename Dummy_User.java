@@ -50,7 +50,7 @@ public class Dummy_User extends Thread {
                         RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("4")){
-                        System.out.println("Provide any letter.");
+                        System.out.println("Provide the dates(FirstDay,LastDay).");
                         RoomDetails = scanner.nextLine();
 
                     }else if (answer.equalsIgnoreCase("Exit")) {
@@ -112,8 +112,34 @@ public class Dummy_User extends Thread {
                         e.printStackTrace();
                     }
                 }
-                
-               
+
+                if (answer.equals("3") && Type.equals("Manager")){
+                    try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {  
+                            @SuppressWarnings("unchecked")
+                            Pair<Integer, List<Booking>> result = (Pair<Integer, List<Booking>>) resultInput.readObject();
+                            List<Booking> allBookings = result.getValue();
+                            System.out.println("\nNumber of :" + allBookings.size()+ "\n");
+                            for (Booking b : allBookings){
+                                b.ShowBooking();
+                            }
+
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (answer.equals("4") && Type.equals("Manager")){
+                    try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {  
+                            @SuppressWarnings("unchecked")
+                            Pair<Integer, List<Booking>> result = (Pair<Integer, List<Booking>>) resultInput.readObject();
+                            List<Booking> allBookings = result.getValue();
+                            System.out.println("\nNumber of :" + allBookings.size()+ "\n");
+                            Booking.showBookingsByArea(allBookings);
+
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
                 
             }
 

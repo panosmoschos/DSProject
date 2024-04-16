@@ -20,7 +20,7 @@ public class Master {
 
         // Specify the port and host for each worker
         int[] ports = {8000, 8001, 8002};
-        String [] hosts = {"localhost","localhost","192.168.1.46"};
+        String [] hosts = {"localhost","localhost","localhost"};
         for (int i = 0; i < NUM_WORKERS; i++) {
             workerPorts.put(i, ports[i]); // Store worker port
             workerHosts.put(i,hosts[i]); //Store worker host
