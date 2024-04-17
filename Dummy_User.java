@@ -22,10 +22,8 @@ public class Dummy_User extends Thread {
             while (true) {
                 /* Create socket for contacting the server on port 4444 */
                 socket = new Socket("localhost", 12345);
-                //new ResponseListener(socket).start();
                 /* Create the streams to send and receive data from server */
                 out = new ObjectOutputStream(socket.getOutputStream());
-               
                 
                 out.writeUTF("USER");
                 out.flush();
@@ -37,7 +35,7 @@ public class Dummy_User extends Thread {
                     System.out.println("1)Add Room.\n2)Add available dates.\n3)Show reservations\n4)Show bookings per area.\nExit");
                     answer = scanner.nextLine();
                     if(answer.equals("1")){
-                        System.out.println("Provide the name of the room and the path of the JSON file.");
+                        System.out.println("Provide the name of the room, and the path of the JSON file.");
                         RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("2")){

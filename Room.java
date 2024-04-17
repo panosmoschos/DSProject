@@ -88,6 +88,7 @@ public class Room implements Serializable {
         if (wanted.isAvailable(availability)){
             availability = wanted.RemoveFrom(availability);
             bookings.add(new Booking(wanted,roomName,area));
+            System.out.println("You made a reservation at " + details[0] + ".");
         }else{
             System.out.println("Sorry, this date is not available at " + details[0] + ".");
         }

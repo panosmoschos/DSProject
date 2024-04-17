@@ -18,9 +18,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8002;
+        int port = 8000;
         String host = "localhost";
-        Worker worker = new Worker(2, port, host);
+        Worker worker = new Worker(0, port, host);
         worker.start();
     }
     
@@ -215,7 +215,7 @@ public class Worker extends Thread {
     }
 
     private void sendOwnerBookingsToReducer(Pair<Integer, List<Booking>> result) {
-        try (Socket reducerSocket = new Socket("localhost", 23456);
+        try (Socket reducerSocket = new Socket("localhost", 23456); //NEEDS SETTING
             ObjectOutputStream out = new ObjectOutputStream(reducerSocket.getOutputStream())) {
             out.writeObject(result);
         } catch (IOException e) {

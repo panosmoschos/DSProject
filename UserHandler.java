@@ -36,7 +36,7 @@ public class UserHandler extends Thread {
                         String host = Master.getHost(workerHosts, workerId);
 
                         try {
-                            Socket socket = new Socket(host, port); //Needs SETTING if workers are on different hosts!!
+                            Socket socket = new Socket(host, port);
                             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                             out.writeObject(newrequest);
                             out.flush();
@@ -57,7 +57,7 @@ public class UserHandler extends Thread {
                     String host = Master.getHost(workerHosts, workerID);
 
                     try {
-                        Socket socket = new Socket(host, workerport); //Needs SETTIING if workers are on different hosts!!
+                        Socket socket = new Socket(host, workerport); 
                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                         out.writeObject(newrequest);
                         out.flush();
@@ -70,7 +70,51 @@ public class UserHandler extends Thread {
 
                 }
                 
+            }else if (type.equals("Manager")){
+                String function = in.readUTF(); // receives the request e.x filtering
+                String FilterDetails = in.readUTF(); // receives the details for the filtering
+                userid = connection.getPort();
+                Request newrequest = new Request(type, function, FilterDetails,userid);
+
+                if (function.equals("1") || function.equals("2") ){ //Add room and available dates
+                    String[] details = FilterDetails.split(",");
+                    String roomname = details[0];
+                    int workerid = Master.hash(roomname) % Master.NUM_WORKERS;
+                    int workerport = workerPorts.get(workerid);
+                    String host = Master.getHost(workerHosts, workerid);
+                    try {
+                        Socket socket = new Socket(host, workerport); 
+                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                        out.writeObject(newrequest);
+                        out.flush();
+                        out.close();
+                        socket.close();
+                        System.out.println("Sent request to Worker " + workerid);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else if(function.equals("3") || function.equals("4")){
+                    //Send the request to all workers.
+                    for (Map.Entry<Integer, Integer> entry : workerPorts.entrySet()) {
+                        int workerId = entry.getKey();
+                        int port = entry.getValue();
+                        String host = Master.getHost(workerHosts, workerId);
+
+                        try {
+                            Socket socket = new Socket(host, port);
+                            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                            out.writeObject(newrequest);
+                            out.flush();
+                            out.close();
+                            socket.close();
+                            System.out.println("Sent request to Worker " + workerId);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
+            
 
             try {
                 // Make the current thread sleep for 1 second
