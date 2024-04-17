@@ -1,14 +1,13 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 
-public class ReducerHandler extends Thread {
+public class WorkerHandler extends Thread {
     private Socket socket;
     private Map<Integer, Socket> portSockets;
     private ObjectInputStream in;
 
-    public ReducerHandler(Socket socket,Map<Integer, Socket> portSockets,ObjectInputStream inputStream) {
+    public WorkerHandler(Socket socket,Map<Integer, Socket> portSockets,ObjectInputStream inputStream) {
         this.socket = socket;
         this.portSockets = portSockets;
         this.in = inputStream;
@@ -19,7 +18,7 @@ public class ReducerHandler extends Thread {
         try{
 
             @SuppressWarnings("unchecked")
-            Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
+            Pair<Integer, String> result =  (Pair<Integer, String>) in.readObject();
             
             // Get the port number from the result
             int portNumber = result.getKey();
@@ -32,9 +31,8 @@ public class ReducerHandler extends Thread {
                 try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
                     
                     out.writeObject(result);
-                    System.out.println("ReudcerHandler sent the results!!" );
+                    System.out.println("WorkerHandler sent the results!!" );
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             } else {

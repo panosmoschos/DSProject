@@ -150,50 +150,6 @@ public class Reducer {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-
-            
-            
-            /*    FAIDONAS KODIKAS 
-                Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
-                int tempkey = result.getKey();
-                int count=0;
-                
-
-                synchronized(results){
-
-                    results.add(result);//add the result in the results list
-
-                    for (Pair<Integer, List<Room>> res : results){
-                        if(tempkey == res.getKey()){
-                            count ++;
-                        }
-                    }
-                    //System.out.println(results);
-
-                    if (count == 3) {//if you find 3 results with the same userid, reduce them and delete them!
-                        Pair<Integer, List<Room>> finalResult = reduceForUserId(tempkey);
-    
-                        synchronized (results) {
-                            Iterator<Pair<Integer, List<Room>>> iterator = results.iterator();
-                            while (iterator.hasNext()) {
-                                Pair<Integer, List<Room>> res = iterator.next();
-                                if (tempkey == res.getKey()) {
-                                    iterator.remove();
-                                }
-                            }
-                        }
-                     
-                        // Send the final result to the Master
-                        sendResultToMaster(finalResult);
-                    }
-
-                }
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            */
-            
         }
 
         private Pair<Integer, List<Room>> reduceForUserId(int userId) {

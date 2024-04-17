@@ -37,37 +37,45 @@ public class Master {
                 Socket socket = serverSocket.accept();
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                 // Check if the connection is from the Reducer or a new user.
-                if (isConnectionFromReducer(socket,inputStream)) {
-                    System.out.println("New REDUCER connection: " + socket);
-                    portSockets.put(socket.getPort(), socket);
-                    new ReducerHandler(socket,portSockets,inputStream).start();
-                } else {
+
+                int connection  = ConnectionFrom(socket,inputStream);
+                if(connection == 1){ //user
                     System.out.println("New USER connection: " + socket);
                     portSockets.put(socket.getPort(), socket);
                     new UserHandler(socket, workerPorts, workerHosts, inputStream).start();
-                }
+                }else if (connection == 2){//reducer
+                    System.out.println("New REDUCER connection: " + socket);
+                    portSockets.put(socket.getPort(), socket);
+                    new ReducerHandler(socket,portSockets,inputStream).start();
+                }else if (connection == 3){// worker
+                    System.out.println("New WORKER connection: " + socket);
+                    portSockets.put(socket.getPort(), socket);
+                    new WorkerHandler(socket,portSockets,inputStream).start();
+                } 
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    //Checks if the new connection is from a new user of the reducer.
-    private static boolean isConnectionFromReducer(Socket socket, ObjectInputStream inputStream) {
-       
-       try {
+    
+    //Checks where the connection is coming from
+    private static int ConnectionFrom(Socket socket, ObjectInputStream inputStream){
+        try {
             String type = inputStream.readUTF();
             if (type.equals("USER")){
-                return false;
+                return 1;
             }else if(type.equals("REDUCER")){
-                return true;
+                return 2;
+            }else if(type.equals("WORKER")){
+                return 3;
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-        }return false;
+        }return 0;
     }
-    
+
+
 
     public static int hash(String roomName){ // simple hash function
         int hash=7;

@@ -111,6 +111,28 @@ public class Dummy_User extends Thread {
                     }
                 }
 
+                if ((answer.equals("2") || answer.equals("3")) && Type.equals("Client")){
+                    try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {  
+                            @SuppressWarnings("unchecked")
+                            Pair<Integer, String> result = (Pair<Integer, String>) resultInput.readObject();
+                            String message = result.getValue();
+                            System.out.println(message);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if ((answer.equals("1") || answer.equals("2")) && Type.equals("Manager")){
+                    try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {  
+                            @SuppressWarnings("unchecked")
+                            Pair<Integer, String> result = (Pair<Integer, String>) resultInput.readObject();
+                            String message = result.getValue();
+                            System.out.println(message);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 if (answer.equals("3") && Type.equals("Manager")){
                     try (ObjectInputStream resultInput = new ObjectInputStream(socket.getInputStream())) {  
                             @SuppressWarnings("unchecked")
@@ -138,6 +160,8 @@ public class Dummy_User extends Thread {
                         e.printStackTrace();
                     }
                 }
+
+                
                 
             }
 

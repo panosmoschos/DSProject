@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Worker extends Thread {
     private ObjectInputStream in;
+    private ObjectOutputStream out;
     private int id,port;
     private String host;
     private List<Room> assignedRooms;
@@ -18,9 +19,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8000;
+        int port = 8002;
         String host = "localhost";
-        Worker worker = new Worker(0, port, host);
+        Worker worker = new Worker(2, port, host);
         worker.start();
     }
     
@@ -33,17 +34,19 @@ public class Worker extends Thread {
 
             Socket mastersocket = serverSocket.accept();
             in = new ObjectInputStream(mastersocket.getInputStream());//Read the rooms from master
+            //out = new ObjectOutputStream(mastersocket.getOutputStream());
             assignedRooms = (List<Room>) in.readObject();
             System.out.println(assignedRooms);
 
             while (true) {
                 Socket userHandlersocket = serverSocket.accept();
                 in = new ObjectInputStream(userHandlersocket.getInputStream());
+                //out = new ObjectOutputStream(userHandlersocket.getOutputStream());
                 // Read the request object from the socket
                 Request request = (Request) in.readObject();
                 int key = request.UserPort;
                 System.out.println("Worker " + id + " processing request: " + request);
-                WorkerThread workerThread = new WorkerThread(request,key);
+                WorkerThread workerThread = new WorkerThread(request,key,out);
                 workerThread.start();
                 
                 // Close the socket and streams
@@ -59,8 +62,7 @@ public class Worker extends Thread {
         private Request request;
         private int key;
         
-
-    public WorkerThread(Request request, int key) {
+    public WorkerThread(Request request, int key, ObjectOutputStream out) {
         this.request = request;
         this.key = key;
     }
@@ -82,8 +84,20 @@ public class Worker extends Thread {
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
                     //bookingsBefore= room.getNumberOfBookings();
-                    room.addBooking(request);
+                    boolean booked;
+                    booked = room.addBooking(request);
+                    if (booked){
+                        String message = "You completed the booking\n";
+                        Pair<Integer, String> result = new Pair<Integer,String>(key,message);
+                        sendResultsToMaster(result);
+                    }else{
+                        String message = "Not available dates, try again\n";
+                        Pair<Integer, String> result = new Pair<Integer,String>(key,message);
+                        sendResultsToMaster(result);
+                    }
                     //bookingsAfter = room.getNumberOfBookings();
+                    
+
 
                     /* 
                     if (bookingsBefore == bookingsAfter){
@@ -106,6 +120,10 @@ public class Worker extends Thread {
                 if (room.getRoomName().equals(roomname)){
                     //reviewsBefore = room.getNoReviews();
                     room.ratingChanges(request);
+                    
+                    String message = "Your rating has been succesfully submited!\n";
+                    Pair<Integer, String> result = new Pair<Integer,String>(key,message);
+                    sendResultsToMaster(result);
                     //reviewsAfter = room.getNoReviews();
 
                     /*
@@ -125,6 +143,10 @@ public class Worker extends Thread {
             Room newRoom = Room.addRoom(request);
            // int numberOfRoomsBefore = assignedRooms.size();
             assignedRooms.add(newRoom);
+            String message = "You succesfully added a new room\n";
+            Pair<Integer, String> result = new Pair<Integer,String>(key,message);
+            sendResultsToMaster(result);
+
             //int numberOfRoomsAfter = assignedRooms.size();
             
             /* 
@@ -144,6 +166,9 @@ public class Worker extends Thread {
                 if (room.getRoomName().equals(roomname)){
                     //daysBefore = Available_Date.DaysAvailable(room.getAvailability());
                     room.addAvailability(request);
+                    String message = "You succesfully added availability";
+                    Pair<Integer, String> result = new Pair<Integer,String>(key,message);
+                    sendResultsToMaster(result);
                     //daysAfter = Available_Date.DaysAvailable(room.getAvailability());
                     
                     /* 
@@ -218,6 +243,19 @@ public class Worker extends Thread {
         try (Socket reducerSocket = new Socket("localhost", 23456); //NEEDS SETTING
             ObjectOutputStream out = new ObjectOutputStream(reducerSocket.getOutputStream())) {
             out.writeObject(result);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendResultsToMaster(Pair<Integer, String> result){
+        
+        try (Socket mastersocket = new Socket("localhost", 12345); //NEEDS SETTING
+            ObjectOutputStream out  = new ObjectOutputStream(mastersocket.getOutputStream())) {
+            out.writeUTF("WORKER");
+            out.flush();
+            out.writeObject(result);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

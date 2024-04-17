@@ -73,7 +73,7 @@ public class Room implements Serializable {
 
 
     // (Client) Adds booking
-    public void addBooking(Request req){
+    public boolean addBooking(Request req){
         // looks like [roomName,FirstDayOfStay,LastDayOfStay]
         String[] details = req.details.split(","); 
         String FirstDay = details[1];
@@ -89,8 +89,10 @@ public class Room implements Serializable {
             availability = wanted.RemoveFrom(availability);
             bookings.add(new Booking(wanted,roomName,area));
             System.out.println("You made a reservation at " + details[0] + ".");
+            return true;
         }else{
             System.out.println("Sorry, this date is not available at " + details[0] + ".");
+            return false;
         }
     }
 
