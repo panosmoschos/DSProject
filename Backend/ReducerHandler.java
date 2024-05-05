@@ -34,7 +34,6 @@ public class ReducerHandler extends Thread {
                     out.writeObject(result);
                     System.out.println("ReudcerHandler sent the results!!" );
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             } else {
