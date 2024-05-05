@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.*;
 
 public class Master {
-    public static final int NUM_WORKERS = 3;
+    public static final int NUM_WORKERS = 3; //Change based on the number of workers
     private static List<Room> rooms = new ArrayList<>();
     private static Map<Integer, Socket> portSockets = new HashMap<>();
     private static Map<Integer, Integer> workerPorts = new HashMap<>(); // Map to store worker ports
@@ -15,12 +15,12 @@ public class Master {
     public static void main(String[] args) {
 
         //Initialize the rooms.
-        String folderPath = "bin/rooms";
+        String folderPath = "Backend/bin/rooms";
         rooms = Room.roomsOfFolder(folderPath);
 
         // Specify the port and host for each worker
-        int[] ports = {8000, 8001, 8002};
-        String [] hosts = {"localhost","localhost","localhost"};
+        int[] ports = {8000, 8001, 8002}; //Change based on the number of workers
+        String [] hosts = {"localhost","localhost","localhost"}; //Change based on the number of workers
         for (int i = 0; i < NUM_WORKERS; i++) {
             workerPorts.put(i, ports[i]); // Store worker port
             workerHosts.put(i,hosts[i]); //Store worker host
@@ -99,7 +99,7 @@ public class Master {
             // Get the subset of rooms assigned to this worker
             List<Room> workerRooms = getWorkerRooms(workerId, rooms);
     
-            try (Socket socket = new Socket(host, port); //need SETTING if workers are on different hosts!!
+            try (Socket socket = new Socket(host, port);
                  ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
     
                 // Send rooms to worker

@@ -89,7 +89,7 @@ public class Reducer {
 
                         //System.out.println(results);
     
-                        if (count1 == 3) {
+                        if (count1 == Master.NUM_WORKERS) {
                             Pair<Integer, List<Room>> finalResult = reduceForUserId(tempkey);
         
                             synchronized (results) {
@@ -124,7 +124,7 @@ public class Reducer {
                         }
                         //System.out.println(results);
     
-                        if (count1 == 3) {
+                        if (count1 == Master.NUM_WORKERS) {
                             Pair<Integer, List<Booking>> finalResult = BOOKINGreduceForUserID(tempkey);
         
                             synchronized (bookings) {
