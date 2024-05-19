@@ -106,24 +106,26 @@ public class Room implements Serializable {
     }
 
     // (Manager) returns list of bookings of area within two dates
-    public List<Booking> getAreaBookingsBetween(Request req){
+    public static List<Booking> getAreaBookingsBetween(List<Room> rooms, Request req){
         String[] details = req.details.split(",");
-        // looks like [area,FromThisDay,TillThatDay]
+        // looks like [FromThisDay,TillThatDay]
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        LocalDate MIN = LocalDate.parse(details[1],df);
-        LocalDate MAX = LocalDate.parse(details[2],df);
+        LocalDate MIN = LocalDate.parse(details[0],df);
+        LocalDate MAX = LocalDate.parse(details[1],df);
         
         List<Booking> between = new ArrayList<>();
-        
-        for (Booking booking : bookings){
 
-            boolean af_eq_MIN = booking.DateOfStay.getFirstDay().isAfter(MIN) || booking.DateOfStay.getFirstDay().isEqual(MIN);
-            boolean bef_eq_MAX = booking.DateOfStay.getLastDay().isBefore(MAX) || booking.DateOfStay.getLastDay().isEqual(MAX);
-            boolean rightArea = details[0].equals(booking.getArea());
+        for (Room room:rooms){
+            for (Booking booking : room.bookings){
 
-            if (af_eq_MIN && bef_eq_MAX && rightArea){
-                between.add(booking);
+                boolean af_eq_MIN = booking.DateOfStay.getFirstDay().isAfter(MIN) || booking.DateOfStay.getFirstDay().isEqual(MIN);
+                boolean bef_eq_MAX = booking.DateOfStay.getLastDay().isBefore(MAX) || booking.DateOfStay.getLastDay().isEqual(MAX);
+                //boolean rightArea = details[0].equals(booking.getArea());
+
+                if (af_eq_MIN && bef_eq_MAX){
+                    between.add(booking);
+                }
             }
         }
 
@@ -131,12 +133,18 @@ public class Room implements Serializable {
     }
 
     // (Manager) Returns bookings of owner
-    public List<Booking> getOwnerBookings(Request req){
-        if (req.details.equals(owner)){
-            return bookings;
+    public static List<Booking> getOwnerBookings(List<Room> rooms,Request req){
+        List<Booking> b = new ArrayList<>();
+        for (Room room: rooms){
+            if (req.details.equals(room.owner)){
+                for (Booking book : room.bookings){
+                    b.add(book);
+                }
+            }
         }
-        return new ArrayList<>();
+        return b;
     }
+    
 
     // (Manager) Adds new available dates
     public void addAvailability(Request req){
@@ -383,66 +391,23 @@ public class Room implements Serializable {
 
 
     // TESTING
-    public static void main(String[] args) {
-       // String folderPath = "bin/rooms/Anatoli.json";
+    /*public static void main(String[] args) {
+       String folderPath = "Backend/bin/rooms";
 
-        /* TESTING addAvailability 
+         TESTING showBookings 
+        List<Room> ROOMS = roomsOfFolder(folderPath);
 
-        Request rAvailability = new Request("x", folderPath, "Thalassi Room,2024/07/03,2024/07/08", 0);
-
-        Room room = findRoomByName("Thalassi Room",rooms);
-        System.out.println("BEFORE BOOKING");
-        for (Available_Date r :room.availability){
-            System.out.println(r.getTimePeriod());
+        for (Room r : ROOMS){
+            if (r.owner.equals("Faidon Azariadis")){
+                System.out.println("Hello");
+            }
         }
 
-        room.addAvailability(rAvailability);
-
-        System.out.println("\nAFTER BOOKING");
-        for (Available_Date r : room.availability){
-            System.out.println(r.getTimePeriod());
-        }
-        System.out.println();
-
-        */
-
-        
-        /*  TESTING addBooking
-        Request rBooking = new Request("x", folderPath, "Thalassi Room,2024/06/15,2024/06/30", 0);
-        Room room = findRoomByName("Thalassi Room",rooms);
-        System.out.println("BEFORE BOOKING");
-        for (Available_Date r :room.availability){
-            System.out.println(r.getTimePeriod());
-        }
-        room.addBooking(rBooking);
-        System.out.println("\nAFTER BOOKING");
-        for (Available_Date r :room.availability){
-            System.out.println(r.getTimePeriod());
-        }
-        System.out.println();
-
-        */
-
-
-        /*  TESTING ratingChanges
-        Room room = findRoomByName("Thalassi Room",rooms);
-        System.out.println(room.stars);
-        String details = "Thalassi Room,1";
-        Request r = new Request(details, folderPath, details, 0);
-        room.ratingChanges(r);
-        System.out.println(room.stars);
-
-        */
-        
-
-        /* prepei na kaneis th filterRooms static gia na treksei
-
-        List<Room> filtered = filterRooms(rooms, r);
-        for (Room f : filtered){
-            System.out.println(f.getRoomName());
-        }
-
-        */
-    }
-
+        Request rBooking = new Request("x", folderPath, "Anatoli,2024/06/12,2024/06/13", 0);
+        Room anatoli = findRoomByName("Anatoli", ROOMS);
+        anatoli.addBooking(rBooking);
+        Request rSHOWBooking = new Request("x", folderPath, "Faidon Azariadis", 0);
+        List<Booking> FAIDONBOOKINGS = getOwnerBookings(ROOMS, rSHOWBooking);
+        System.out.println(FAIDONBOOKINGS.size());
+    */
 }

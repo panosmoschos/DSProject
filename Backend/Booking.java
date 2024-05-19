@@ -26,9 +26,9 @@ public class Booking implements Serializable{
 
         // seeing how many areas are there
         List<String> areas = new ArrayList<>();
-        for (Booking b : bookings){
-            if (!areas.contains(b.area)){
-                areas.add(b.getArea());
+        for (Booking booking : bookings){
+            if (!areas.contains(booking.area)){
+                areas.add(booking.getArea());
             }
         }
 

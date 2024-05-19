@@ -48,7 +48,7 @@ public class Dummy_User extends Thread {
                         RoomDetails = scanner.nextLine();
 
                     }else if(answer.equals("4")){
-                        System.out.println("Provide the dates(FirstDay,LastDay).");
+                        System.out.println("Provide the dates as FirstDay,LastDay.");
                         RoomDetails = scanner.nextLine();
 
                     }else if (answer.equalsIgnoreCase("Exit")) {
@@ -138,9 +138,10 @@ public class Dummy_User extends Thread {
                             @SuppressWarnings("unchecked")
                             Pair<Integer, List<Booking>> result = (Pair<Integer, List<Booking>>) resultInput.readObject();
                             List<Booking> allBookings = result.getValue();
-                            System.out.println("\nNumber of :" + allBookings.size()+ "\n");
+                            System.out.println("\nNumber of bookings:" + allBookings.size()+ "\n");
                             for (Booking b : allBookings){
                                 b.ShowBooking();
+                                System.out.println();
                             }
 
                     } catch (ClassNotFoundException e) {
@@ -153,15 +154,13 @@ public class Dummy_User extends Thread {
                             @SuppressWarnings("unchecked")
                             Pair<Integer, List<Booking>> result = (Pair<Integer, List<Booking>>) resultInput.readObject();
                             List<Booking> allBookings = result.getValue();
-                            System.out.println("\nNumber of :" + allBookings.size()+ "\n");
+                            System.out.println("\nNumber of bookings:" + allBookings.size()+ "\n");
                             Booking.showBookingsByArea(allBookings);
 
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
-
-                
                 
             }
 

@@ -19,9 +19,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8000;
+        int port = 8002;
         String host = "localhost";
-        Worker worker = new Worker(0, port, host);
+        Worker worker = new Worker(2, port, host);
         worker.start();
     }
     
@@ -79,11 +79,8 @@ public class Worker extends Thread {
         if (request.function.equals("2") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
-            //int bookingsBefore = 0;
-            //int bookingsAfter = 0;
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
-                    //bookingsBefore= room.getNumberOfBookings();
                     boolean booked;
                     booked = room.addBooking(request);
                     if (booked){
@@ -95,15 +92,6 @@ public class Worker extends Thread {
                         Pair<Integer, String> result = new Pair<Integer,String>(key,message);
                         sendResultsToMaster(result);
                     }
-                    //bookingsAfter = room.getNumberOfBookings();
-                    
-
-
-                    /* 
-                    if (bookingsBefore == bookingsAfter){
-                        // emfanise to ston user
-                    }
-                    */
                     
                     break;
                 }
@@ -185,8 +173,12 @@ public class Worker extends Thread {
         // Manager - Gather bookings of owner
         if (request.type.equals("Manager") && request.function.equals("3")){
             Pair<Integer, List<Booking>> result = mapbookings(key, request);
-            sendOwnerBookingsToReducer(result);
             
+            if (!result.getValue().isEmpty()){ // testing 
+                System.out.println(result.getValue().get(0));
+            }
+
+            sendOwnerBookingsToReducer(result);
         }
 
         // Manager - Gather bookings by area
@@ -216,17 +208,13 @@ public class Worker extends Thread {
 
     public Pair<Integer,List<Booking>> mapbookings(int key,Request value){
         List<Booking> bookings = new ArrayList<>();
-        for (Room room : assignedRooms){
-            bookings = room.getOwnerBookings(value);
-        }
-        return new Pair<>(key,bookings);
+        bookings = Room.getOwnerBookings(assignedRooms,value);
+        return new Pair<>(key, bookings);
     }
 
     public Pair<Integer,List<Booking>> mapbookingsByArea(int key,Request value){
         List<Booking> bookings = new ArrayList<>();
-        for (Room room : assignedRooms){
-            bookings = room.getAreaBookingsBetween(value);
-        }
+        bookings = Room.getAreaBookingsBetween(assignedRooms,value);
         return new Pair<>(key,bookings);
     }
 

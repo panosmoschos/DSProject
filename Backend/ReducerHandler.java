@@ -18,26 +18,47 @@ public class ReducerHandler extends Thread {
     public void run() {
         try{
 
-            @SuppressWarnings("unchecked")
-            Pair<Integer, List<Room>> result = (Pair<Integer, List<Room>>) in.readObject();
-            
-            // Get the port number from the result
-            int portNumber = result.getKey();
 
-            // Get the socket associated with the port number
-            Socket userSocket = portSockets.get(portNumber);
-
-            // Write the result to the user's socket
-            if (userSocket != null) {
-                try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
-                    
-                    out.writeObject(result);
-                    System.out.println("ReudcerHandler sent the results!!" );
-                } catch (IOException e) {
-                    e.printStackTrace();
+            Object ob = in.readObject();
+            if (ob instanceof Pair){
+                @SuppressWarnings("unchecked")
+                Pair<Integer,?> res = (Pair<Integer,?>) ob;
+                if (res.getValue() instanceof List){
+                    List<?> whatType = (List<?>) res.getValue();
+                    if (whatType.get(0) instanceof Room){
+                        @SuppressWarnings("unchecked")
+                        Pair <Integer,List<Room>> result = (Pair<Integer,List<Room>>) ob;
+                        int portNumber = result.getKey();;
+                        Socket userSocket = portSockets.get(portNumber);
+                        if (userSocket != null) {
+                            try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
+                                
+                                out.writeObject(result);
+                                System.out.println("ReudcerHandler sent the results!!" );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            System.out.println("User socket not found for user ID: " );
+                        }
+                    }else{
+                        @SuppressWarnings("unchecked")
+                        Pair<Integer,List<Booking>> result = (Pair<Integer,List<Booking>>) ob;
+                        int portNumber = result.getKey();;
+                        Socket userSocket = portSockets.get(portNumber);
+                        if (userSocket != null) {
+                            try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
+                                
+                                out.writeObject(result);
+                                System.out.println("ReudcerHandler sent the results!!" );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            System.out.println("User socket not found for user ID: " );
+                        }
+                    }
                 }
-            } else {
-                System.out.println("User socket not found for user ID: " );
             }
 
         } catch (ClassNotFoundException | IOException e) {

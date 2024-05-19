@@ -53,8 +53,10 @@ public class Reducer {
                 boolean isBooking= false;
                 int count1 = 0;
                 int tempkey = result1.getKey();
+                System.out.println(result1.getValue());
         
                 if (!value.isEmpty()) {
+                    //System.out.println("Hello");
                     Object firstElement = value.get(0);
                     if (firstElement instanceof Room) {
                         isRoom = true;
@@ -106,7 +108,7 @@ public class Reducer {
                             System.out.println(count1);
                             sendResultToMaster(finalResult);
                         }
-                        System.out.println(count1);
+                        //System.out.println(count1);
                     }
 
                 } else if (isBooking) {
@@ -138,7 +140,7 @@ public class Reducer {
                             }
                          
                             // Send the final result to the Master
-                            System.out.println(finalResult.getValue().size());
+                            //System.out.println(finalResult.getValue().size());
                             sendBookingsToMaster(finalResult);
                         }
     
