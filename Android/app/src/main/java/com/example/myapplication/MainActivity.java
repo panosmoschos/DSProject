@@ -1,25 +1,60 @@
 package com.example.myapplication;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.myapplication.RoomClasses.Pair;
+import com.example.myapplication.RoomClasses.Room;
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.Socket;
+import java.util.List;
+
+
+
+public class MainActivity extends AppCompatActivity implements Serializable {
     TextView welcomeView;
-    private EditText LocationFilter, startDate, endDate, numOfPeople,price;
+    private EditText LocationFilter, startDate, endDate, numOfPeople, price;
     private RatingBar stars;
     private Button searchButton;
+    private List<Room> rooms;
+
+    public Handler myHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            // Extract the room list from the message
+            Bundle bundle = message.getData();
+            Pair<Integer, List<Room>> receivedResult = (Pair<Integer, List<Room>>) bundle.getSerializable("rooms");
+
+            // Update the welcomeView with room names
+            if (receivedResult != null) {
+                List<Room> receivedRooms = receivedResult.getValue();
+                StringBuilder roomNames = new StringBuilder();
+                for (Room room : receivedRooms) {
+                    roomNames.append(room.getRoomName()).append("\n");
+                }
+                welcomeView.setText(roomNames.toString());
+                Toast.makeText(MainActivity.this, "Rooms received", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "No rooms found", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,25 +82,53 @@ public class MainActivity extends AppCompatActivity {
                 String firstDate = startDate.getText().toString();
                 String lastDate = endDate.getText().toString();
 
-
                 // create the "details" of filter
                 String loc = TextUtils.isEmpty(location) ? "x" : location;
                 String num = TextUtils.isEmpty(numPeople) ? "x" : numPeople;
                 String st = (s == 0.0) ? "x" : starsRating;
-                String pr= TextUtils.isEmpty(max_price) ? "x" : max_price;
+                String pr = TextUtils.isEmpty(max_price) ? "x" : max_price;
                 String FD = TextUtils.isEmpty(firstDate) ? "x" : firstDate;
                 String LD = TextUtils.isEmpty(lastDate) ? "x" : lastDate;
 
-                String filter = loc + "," + FD + "," + LD + "," + num + "," + pr + "," +st;
-                System.out.println(filter);
+                String filter = loc + "," + FD + "," + LD + "," + num + "," + pr + "," + st;
+
+                // Run the network operation in a separate thread
+                new Thread(() -> {
+                    try {
+                        Socket socket = new Socket("192.168.1.212", 12345);
+                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
 
-                // change activity
-                Intent intent = new Intent(MainActivity.this, ResultsActivity.class);
-                startActivity(intent);
+
+                        out.writeUTF("USER");
+                        out.flush();
+                        out.writeUTF("Client");
+                        out.flush(); // Ensure the message is sent
+                        out.writeUTF("1");
+                        out.flush();
+                        out.writeUTF(filter);
+                        out.flush();
+
+
+                        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                        //Thread.sleep(10000);
+                        @SuppressWarnings("unchecked")
+                        Pair<Integer, List<Room>> finalResult = (Pair<Integer, List<Room>>) in.readObject();
+                        socket.close();
+
+                        // Send the result to the handler
+                        Message message = new Message();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("rooms", (Serializable) finalResult);
+                        message.setData(bundle);
+                        myHandler.sendMessage(message);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error connecting to server", Toast.LENGTH_SHORT).show());
+                    }
+                }).start();
             }
         });
-
     }
-
 }
