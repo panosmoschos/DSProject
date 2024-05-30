@@ -30,18 +30,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
         return new RoomViewHolder(LayoutInflater.from(context).inflate(R.layout.display_room, parent, false));
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
-        Room room = rooms.get(position);
-
-        Picasso.get().load(room.getImage()).into(holder.roomImage);
-        holder.roomName.setText(room.getRoomName());
-        holder.area.setText(room.getArea(room));
-        holder.price.setText(room.getPrice());
-        holder.owner.setText(room.getOwner(room));
-        holder.rating.setRating((float) room.getStars());
-        //holder.bookButton.setOnClickListener(v -> onBookClickListener.onBookClick(position));
-    }
 
     @Override
     public int getItemCount() {
@@ -54,8 +42,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
         RatingBar rating;
         Button bookButton;
 
-        public RoomViewHolder(View roomView) {
-            super(roomView);
+        public RoomViewHolder(View itemView) {
+            super(itemView);
             roomImage = itemView.findViewById(R.id.roomImage);
             roomName = itemView.findViewById(R.id.roomName);
             area = itemView.findViewById(R.id.area);
@@ -74,6 +62,20 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
             });
         }
 
+    }
+
+
+    @Override
+    public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
+        Room room = rooms.get(position);
+        Picasso.get().load(room.getImage()).into(holder.roomImage);
+        holder.roomName.setText(room.getRoomName());
+        holder.area.setText("Area: " + room.getArea(room));
+        // PREPEI NA PAIRNEI TO SWSTO PRICE KAI TO SWSTO NUMBER OF REVIEWS
+        holder.price.setText("Price: " + String.valueOf(room.getPrice()) );
+        holder.owner.setText("Owner: " + room.getOwner(room));
+        holder.numOfReviews.setText("Reviews: " + String.valueOf(room.getNoReviews()));
+        holder.rating.setRating((float) room.getStars());
     }
 
 }

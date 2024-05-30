@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         welcomeView = findViewById(R.id.welcomeView);
-
         LocationFilter = findViewById(R.id.LocationFilter);
         startDate = findViewById(R.id.startDate);
         endDate = findViewById(R.id.endDate);
@@ -57,11 +56,14 @@ public class MainActivity extends AppCompatActivity {
                 String LD = TextUtils.isEmpty(lastDate) ? "x" : lastDate;
 
                 String filter = loc + "," + FD + "," + LD + "," + num + "," + pr + "," +st;
-                System.out.println(filter);
-
+                System.out.println(filter); // testing
 
                 // change activity
                 Intent intent = new Intent(MainActivity.this, ResultsActivity.class);
+
+                // Optionally, pass any data to the ResultsActivity
+                // px edw tha mpoun ta returned results
+
                 startActivity(intent);
             }
         });

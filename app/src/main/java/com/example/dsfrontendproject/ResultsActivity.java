@@ -20,22 +20,28 @@ public class ResultsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_results);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+
+
+        EdgeToEdge.enable(this);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_results), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        //TEST
+
+
+
         List<Room> rooms = new ArrayList<>();
         rooms.add(new Room("Oasis", 2, "Naxos", 3, 10, "https://athensprimehotels.com/wp-content/uploads/stantard-room-photo1.jpg", 120, null, "Marika"));
-        rooms.add(new Room("Blue Sky", 2, "Naxos", 3, 10, "https://athensprimehotels.com/wp-content/uploads/stantard-room-photo1.jpg", 120, null, "Mitsos"));
+        rooms.add(new Room("Blue Sky", 2, "Naxos", 5, 10, "https://athensprimehotels.com/wp-content/uploads/stantard-room-photo3.jpg", 152, null, "Mitsos"));
+        System.out.println(rooms.size());
 
-        RecyclerView roomsRecycler = findViewById(R.id.roomsRecyclerView);
+        RecyclerView roomsRecycler = (RecyclerView) findViewById(R.id.roomsRecyclerView);
         roomsRecycler.setLayoutManager(new LinearLayoutManager(this));
         roomsRecycler.setAdapter(new RoomsAdapter(this, rooms));
 
     }
+
 }
