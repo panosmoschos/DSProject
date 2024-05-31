@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="First Day of Stay"
+        android:hint="First Day of Stay (YYYY/MM/DD)"
 
         android:inputType="date"
         android:padding="12dp"
@@ -62,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Last Day of Stay"
+        android:hint="Last Day of Stay (YYYY/MM/DD)"
 
         android:inputType="date"
         android:padding="18dp"
