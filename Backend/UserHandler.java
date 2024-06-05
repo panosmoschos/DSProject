@@ -1,5 +1,7 @@
+
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.Map;
 
 public class UserHandler extends Thread {
@@ -9,13 +11,14 @@ public class UserHandler extends Thread {
     private int userid;
     private Map<Integer, Integer> workerPorts;
     private Map<Integer, String> workerHosts;
+    
 
-    public UserHandler(Socket connection, Map<Integer, Integer> workerPorts, Map<Integer, String> workerHosts, ObjectInputStream inputStream) throws IOException {
+    public UserHandler(Socket connection, Map<Integer, Integer> workerPorts, Map<Integer, String> workerHosts, ObjectInputStream inputStream ) throws IOException {
         this.connection = connection;
         this.workerHosts = workerHosts;
         this.in = inputStream;
         this.workerPorts = workerPorts;
-        
+    
     }
 
     public void run() {
@@ -68,6 +71,26 @@ public class UserHandler extends Thread {
                         e.printStackTrace();
                     }
 
+                }else if (function.equals("4") ){
+                    try {
+                       
+                        String roompath = in.readUTF();
+
+                        ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream());
+                        
+                        File imageFile = new File(roompath);
+                        byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+                        System.out.println(imageBytes);
+
+                        // Write the image bytes to the output stream
+                        out.write(imageBytes);
+                        out.flush();
+                        
+                        out.close();
+                        connection.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 
             }else if (type.equals("Manager")){

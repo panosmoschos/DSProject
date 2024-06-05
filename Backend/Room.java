@@ -35,6 +35,9 @@ public class Room implements Serializable {
         this.bookings = new ArrayList<>();
     }
    
+
+    
+
     public List<Available_Date> getAvailability() {
         return availability;
     }
@@ -75,8 +78,10 @@ public class Room implements Serializable {
 
 
 
+
+
     // (Client) Adds booking
-    public boolean addBooking(Request req){
+    public boolean addBooking(Request req){ 
         lock.lock();
         try{
              // looks like [roomName,FirstDayOfStay,LastDayOfStay]
@@ -84,7 +89,7 @@ public class Room implements Serializable {
             String FirstDay = details[1];
             String LastDay = details[2];
 
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy/MM/dd"); 
             LocalDate FD = LocalDate.parse(FirstDay,df);
             LocalDate LD = LocalDate.parse(LastDay,df);
 
@@ -387,7 +392,7 @@ public class Room implements Serializable {
         }
         System.out.println("Owner: " + room.getOwner(room));
     }
-    
+
 
 
     // TESTING

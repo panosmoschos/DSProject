@@ -4,7 +4,7 @@
 "area": "Koufonisia",
 "stars": 4,
 "noOfReviews": 8,
-"roomImage": "/usr/bin/images/Panormos.png",
+"roomImage": "D:/OneDrive - aueb.gr/Docs/sxoli/Year 3/Katanemimena/DSproject/Backend/bin/rooms/Panormos.png",
 "price": 250,
 "availability": [{"start_date": "2024/07/01","end_date": "2024/07/29"},{"start_date": "2024/08/04","end_date": "2024/08/24"}],
 "owner": "Panagiotis Moschos"

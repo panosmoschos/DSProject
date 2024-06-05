@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -51,7 +52,7 @@ public class Master {
                     System.out.println("New WORKER connection: " + socket);
                     portSockets.put(socket.getPort(), socket);
                     new WorkerHandler(socket,portSockets,inputStream).start();
-                } 
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

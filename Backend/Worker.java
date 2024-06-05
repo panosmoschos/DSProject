@@ -1,3 +1,4 @@
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
@@ -19,9 +20,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8002;
+        int port = 8000;
         String host = "localhost";
-        Worker worker = new Worker(2, port, host);
+        Worker worker = new Worker(0, port, host);
         worker.start();
     }
     

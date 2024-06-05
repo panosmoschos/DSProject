@@ -1,7 +1,12 @@
+
 import java.io.*;
 import java.net.Socket;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class ReducerHandler extends Thread {
     private Socket socket;
@@ -28,12 +33,31 @@ public class ReducerHandler extends Thread {
                     if (whatType.get(0) instanceof Room){
                         @SuppressWarnings("unchecked")
                         Pair <Integer,List<Room>> result = (Pair<Integer,List<Room>>) ob;
-                        int portNumber = result.getKey();;
+                        int portNumber = result.getKey();
                         Socket userSocket = portSockets.get(portNumber);
                         if (userSocket != null) {
                             try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
+
+                                //GIA FRONTEND ONLY:
+                                List<Room> roomlist = result.getValue();
+                                // Convert list of Room objects to a JSON array
+                                JSONArray roomListJson = roomListToJson(roomlist);
+
+                                // Convert JSON array to a string
+                                String jsonString = roomListJson.toString();
+
+                                // Remove leading non-printable characters or binary data
+                                jsonString = jsonString.replaceFirst("^\\p{C}+", "");
+
+                                // Send JSON data over the socket
+                                PrintWriter out2 = new PrintWriter(new OutputStreamWriter(userSocket.getOutputStream(), "UTF-8"), true);
+                                out2.println(jsonString);
+                                out2.flush();
+                                //System.out.println(jsonString); // Optional: Print the JSON string for debugging
+
+                                // GIA BACKEND ONLY:
+                                //out.writeObject(result); 
                                 
-                                out.writeObject(result);
                                 System.out.println("ReudcerHandler sent the results!!" );
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -71,5 +95,44 @@ public class ReducerHandler extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONObject roomToJson(Room room) {
+        JSONObject roomJson = new JSONObject();
+
+        roomJson.put("roomName", room.getRoomName());
+        roomJson.put("noOfPersons", room.getNoPerson());
+        roomJson.put("area", room.getArea(room));
+        roomJson.put("stars", room.getStars());
+        roomJson.put("noOfReviews", room.getNoReviews());
+        roomJson.put("roomImage", room.getImage());
+        roomJson.put("price", room.getPrice());
+        roomJson.put("owner", room.getOwner(room));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        // Convert availability list to JSON array
+        JSONArray availabilityJson = new JSONArray();
+        for (Available_Date date : room.getAvailability()) {
+            JSONObject dateJson = new JSONObject();
+            dateJson.put("start_date", date.getFirstDay().format(formatter));
+            dateJson.put("end_date", date.getLastDay().format(formatter));
+            availabilityJson.add(dateJson);  // Use put method to add JSON object to array
+        }
+        roomJson.put("availability", availabilityJson);
+     
+        return roomJson;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONArray roomListToJson(List<Room> roomList) {
+        JSONArray roomListJson = new JSONArray();
+
+        for (Room room : roomList) {
+            roomListJson.add(roomToJson(room));
+        }
+
+        return roomListJson;
     }
 }
