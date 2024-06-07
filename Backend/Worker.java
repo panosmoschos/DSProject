@@ -20,9 +20,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8000;
+        int port = 8002;
         String host = "localhost";
-        Worker worker = new Worker(0, port, host);
+        Worker worker = new Worker(2, port, host);
         worker.start();
     }
     

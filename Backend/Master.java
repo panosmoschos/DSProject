@@ -37,8 +37,8 @@ public class Master {
             while (true) {
                 Socket socket = serverSocket.accept();
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+              
                 // Check if the connection is from the Reducer or a new user.
-
                 int connection  = ConnectionFrom(socket,inputStream);
                 if(connection == 1){ //user
                     System.out.println("New USER connection: " + socket);

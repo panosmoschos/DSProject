@@ -10,16 +10,16 @@ public class Dummy_User extends Thread {
 	String received;
 	Scanner scanner = new Scanner(System.in);
    
-
-	
 	public void run() {
         Socket socket = null;
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
         String answer = "";
         String RoomDetails = "";
+       
 
         try {
+
             while (true) {
                 /* Create socket for contacting the server on port 4444 */
                 socket = new Socket("localhost", 12345);
@@ -197,9 +197,8 @@ public class Dummy_User extends Thread {
     }
 
 	public static void main(String args[]) {
-		new Dummy_User().start();
+       new Dummy_User().start();
 	}
-
 
 }
 

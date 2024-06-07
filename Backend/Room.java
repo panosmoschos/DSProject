@@ -253,7 +253,7 @@ public class Room implements Serializable {
         if (desiredStars.equals("x")){
             return true;
         }else{
-            return stars >= Integer.parseInt(desiredStars);
+            return stars == Integer.parseInt(desiredStars);
         }
     }
 

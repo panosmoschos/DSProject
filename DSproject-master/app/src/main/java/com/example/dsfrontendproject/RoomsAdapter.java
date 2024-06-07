@@ -68,7 +68,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
     @Override
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
         Room room = rooms.get(position);
-        Picasso.get().load(room.getImage()).into(holder.roomImage);
+        holder.roomImage.setImageBitmap(room.getImageBitmap());
+        //Picasso.get().load(room.getImage()).into(holder.roomImage);
         holder.roomName.setText(room.getRoomName());
         holder.area.setText("Area: " + room.getArea(room));
         holder.price.setText("Price: " + String.valueOf(room.getPrice()) );
@@ -89,10 +90,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
 
     // Method to update room image
     public void updateRoomImage(String roomName, Bitmap bitmap) {
-        for (Room room : rooms) {
+        for (int i = 0; i < rooms.size(); i++) {
+            Room room = rooms.get(i);
             if (room.getRoomName().equals(roomName)) {
                 room.setImageBitmap(bitmap);
-                notifyDataSetChanged();
+                notifyItemChanged(i); // Update only the specific item
                 break;
             }
         }

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Objects;
 
 import android.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,6 +43,7 @@ import android.widget.EditText;
 public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.bookingClickListener {
     private String FirstDay;
     private String LastDay;
+
 
     RoomsAdapter roomsAdapter;
 
@@ -61,17 +64,17 @@ public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.b
         LastDay = i.getStringExtra("LastDay");
         List<Room> roomList = (List<Room>) i.getSerializableExtra("RoomList");
 
-        // Load room images from the server
-        for (Room room : roomList) {
-            loadRoomImage(room);
-        }
 
         RoomsAdapter.bookingClickListener listener = this;
         RecyclerView roomsRecycler = findViewById(R.id.roomsRecyclerView);
         roomsRecycler.setLayoutManager(new LinearLayoutManager(this));
         roomsAdapter = new RoomsAdapter(this, roomList, listener); // Instantiate the RoomsAdapter
-        roomsRecycler.setAdapter(new RoomsAdapter(this, roomList, listener));
+        roomsRecycler.setAdapter(roomsAdapter);
 
+        // Load room images from the server
+        for (Room room : roomList) {
+            loadRoomImage(room);
+        }
     }
 
     private void loadRoomImage(Room room) {
@@ -93,37 +96,45 @@ public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.b
                 out.writeUTF(roompath);
                 out.flush();
 
+
+                // Update UI on the main th read
+                File imageFile = new File(getFilesDir(), room.getRoomName() + ".png");
+
                 InputStream is = socket.getInputStream();
-                FileOutputStream fos = new FileOutputStream(getFilesDir() + "/" + room.getRoomName() + ".jpg");
+                FileOutputStream fos = new FileOutputStream(getFilesDir() + "/" + room.getRoomName() + ".png");
                 byte[] buffer = new byte[1024];
                 int bytesRead;
+
+                StringBuilder hexString = new StringBuilder();
 
                 // Read room image data from the server
                 while ((bytesRead = is.read(buffer)) != -1) {
                     fos.write(buffer, 0, bytesRead);
-                }
 
+                    for (int i = 0; i < bytesRead; i++) {
+                        String hex = Integer.toHexString(0xFF & buffer[i]);
+                        if (hex.length() == 1) {
+                            hexString.append('0'); // Add leading zero for single digit hex values
+                        }
+                        hexString.append(hex);
+                    }
+                }
                 // Close streams and socket
                 fos.close();
                 socket.close();
 
-                // Update UI on the main thread
-                // Update UI on the main thread
-                // Load room image from the local file
-                File imageFile = new File(getFilesDir(), room.getRoomName() + ".jpg");
-                if (imageFile.exists()) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                    // Update the image in the adapter
-                    roomsAdapter.updateRoomImage(room.getRoomName(), bitmap);
-                }
                 runOnUiThread(() -> {
-
+                    if (imageFile.exists()) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                        roomsAdapter.updateRoomImage(room.getRoomName(), bitmap); // Update the image in the adapter
+                    }
                 });
 
             } catch (IOException e) {
                 e.printStackTrace();
                 runOnUiThread(() -> Toast.makeText(ResultsActivity.this, "Error loading room images", Toast.LENGTH_SHORT).show());
             }
+
         }).start();
     }
 
@@ -136,6 +147,18 @@ public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.b
         }
     }
 
+    public String bytesToHexString(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(0xFF & b);
+            if (hex.length() == 1) {
+                hexString.append('0'); // Add leading zero for single digit hex values
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
     @SuppressLint("UseCompatLoadingForDrawables")
     public void displayBookingConfirmation(String FD, String LD, Room room) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -144,6 +167,8 @@ public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.b
         dialogBuilder.setMessage("First Day: " + FD + "\nLast Day: " + LD);
 
         dialogBuilder.setPositiveButton("Confirm Booking", (dialog, id) -> {
+
+            // apo dw kai kato
             dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Thank you for your booking.", Toast.LENGTH_SHORT).show();
 
@@ -152,6 +177,7 @@ public class ResultsActivity extends AppCompatActivity implements RoomsAdapter.b
             LocalDate lastDay = LocalDate.parse(LastDay,df);
             String details = room.getRoomName() +  "," + FD + ","+ LD;
 
+            //Booking method
             new Thread(() -> {
                 try {
                     Socket socket = new Socket("192.168.1.212", 12345);

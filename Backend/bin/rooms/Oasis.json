@@ -4,7 +4,7 @@
 "area": "Paros",
 "stars": 2,
 "noOfReviews": 9,
-"roomImage": "D:/OneDrive - aueb.gr/Docs/sxoli/Year 3/Katanemimena/DSproject/Backend/bin/rooms/Oasis.png",
+"roomImage": "D:\\OneDrive - aueb.gr\\Docs\\sxoli\\Year 3\\Katanemimena\\DSproject\\Backend\\bin\\images\\Oasis.png",
 "price": 100,
 "availability": [{"start_date": "2024/06/01","end_date": "2024/08/28"}],
 "owner": "Panagiotis Moschos"

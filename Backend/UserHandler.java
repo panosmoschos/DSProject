@@ -1,7 +1,6 @@
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
 import java.util.Map;
 
 public class UserHandler extends Thread {
@@ -73,21 +72,22 @@ public class UserHandler extends Thread {
 
                 }else if (function.equals("4") ){
                     try {
-                       
                         String roompath = in.readUTF();
 
-                        ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream());
-                        
                         File imageFile = new File(roompath);
-                        byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-                        System.out.println(imageBytes);
+                        FileInputStream fis = new FileInputStream(imageFile);
+                        BufferedOutputStream bos = new BufferedOutputStream(connection.getOutputStream());
+                        DataOutputStream dos = new DataOutputStream(bos); 
+           
+                        byte[] imageBytes = new byte[(int) imageFile.length()];
+                        fis.read(imageBytes);
 
-                        // Write the image bytes to the output stream
-                        out.write(imageBytes);
-                        out.flush();
-                        
-                        out.close();
+                        dos.write(imageBytes); // Send image data
+                        dos.flush();
+                        fis.close();
+
                         connection.close();
+                       
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

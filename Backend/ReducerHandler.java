@@ -22,8 +22,6 @@ public class ReducerHandler extends Thread {
     @Override
     public void run() {
         try{
-
-
             Object ob = in.readObject();
             if (ob instanceof Pair){
                 @SuppressWarnings("unchecked")
@@ -38,26 +36,31 @@ public class ReducerHandler extends Thread {
                         if (userSocket != null) {
                             try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {
 
-                                //GIA FRONTEND ONLY:
-                                List<Room> roomlist = result.getValue();
-                                // Convert list of Room objects to a JSON array
-                                JSONArray roomListJson = roomListToJson(roomlist);
-
-                                // Convert JSON array to a string
-                                String jsonString = roomListJson.toString();
-
-                                // Remove leading non-printable characters or binary data
-                                jsonString = jsonString.replaceFirst("^\\p{C}+", "");
-
-                                // Send JSON data over the socket
-                                PrintWriter out2 = new PrintWriter(new OutputStreamWriter(userSocket.getOutputStream(), "UTF-8"), true);
-                                out2.println(jsonString);
-                                out2.flush();
-                                //System.out.println(jsonString); // Optional: Print the JSON string for debugging
-
-                                // GIA BACKEND ONLY:
-                                //out.writeObject(result); 
+                                int i = 0 ; //Change based on using only backend or frontend
                                 
+                                if (i==0){
+                                    //GIA FRONTEND ONLY:
+                                    List<Room> roomlist = result.getValue();
+                                    // Convert list of Room objects to a JSON array
+                                    JSONArray roomListJson = roomListToJson(roomlist);
+
+                                    // Convert JSON array to a string
+                                    String jsonString = roomListJson.toString();
+
+                                    // Remove leading non-printable characters or binary data
+                                    jsonString = jsonString.replaceFirst("^\\p{C}+", "");
+
+                                    // Send JSON data over the socket
+                                    PrintWriter out2 = new PrintWriter(new OutputStreamWriter(userSocket.getOutputStream(), "UTF-8"), true);
+                                    out2.println(jsonString);
+                                    out2.flush();
+                                    System.out.println(jsonString); // Optional: Print the JSON string for debugging
+
+                                }else if (i==1){
+
+                                    // GIA BACKEND ONLY:
+                                    out.writeObject(result); 
+                                }
                                 System.out.println("ReudcerHandler sent the results!!" );
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -68,7 +71,7 @@ public class ReducerHandler extends Thread {
                     }else{
                         @SuppressWarnings("unchecked")
                         Pair<Integer,List<Booking>> result = (Pair<Integer,List<Booking>>) ob;
-                        int portNumber = result.getKey();;
+                        int portNumber = result.getKey();
                         Socket userSocket = portSockets.get(portNumber);
                         if (userSocket != null) {
                             try (ObjectOutputStream out = new ObjectOutputStream(userSocket.getOutputStream())) {

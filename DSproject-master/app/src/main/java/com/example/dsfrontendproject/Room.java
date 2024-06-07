@@ -28,7 +28,7 @@ public class Room implements Serializable {
     private List<Available_Date> availability;
     private String owner;
     private List<Booking> bookings;
-    private transient Bitmap imageBitmap; // transient to avoid serialization
+    private  Bitmap imageBitmap; // transient to avoid serialization
 
 
     // Constructor
