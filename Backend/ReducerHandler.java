@@ -39,7 +39,7 @@ public class ReducerHandler extends Thread {
                                 int i = 0 ; //Change based on using only backend or frontend
                                 
                                 if (i==0){
-                                    //GIA FRONTEND ONLY:
+                                    //FRONTEND ONLY:
                                     List<Room> roomlist = result.getValue();
                                     // Convert list of Room objects to a JSON array
                                     JSONArray roomListJson = roomListToJson(roomlist);
@@ -58,7 +58,7 @@ public class ReducerHandler extends Thread {
 
                                 }else if (i==1){
 
-                                    // GIA BACKEND ONLY:
+                                    //BACKEND ONLY:
                                     out.writeObject(result); 
                                 }
                                 System.out.println("ReudcerHandler sent the results!!" );

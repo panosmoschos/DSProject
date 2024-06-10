@@ -20,9 +20,9 @@ public class Worker extends Thread {
     }
 
     public static void main(String[] args) {
-        int port = 8002;
+        int port = 8000;
         String host = "localhost";
-        Worker worker = new Worker(2, port, host);
+        Worker worker = new Worker(0, port, host);
         worker.start();
     }
     
@@ -103,24 +103,14 @@ public class Worker extends Thread {
         if (request.function.equals("3") && request.type.equals("Client")){
             String[] details = request.details.split(",");
             String roomname = details[0];
-            //int reviewsBefore = 0;
-            //int reviewsAfter = 0;
+
             for ( Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
-                    //reviewsBefore = room.getNoReviews();
                     room.ratingChanges(request);
                     
                     String message = "Your rating has been succesfully submited!\n";
                     Pair<Integer, String> result = new Pair<Integer,String>(key,message);
                     sendResultsToMaster(result);
-                    //reviewsAfter = room.getNoReviews();
-
-                    /*
-                    if (reviewsBefore == reviewsAfter){
-                        // emfanise to ston user
-                    }
-                    */
-
                     break;
                 }
             }
@@ -130,27 +120,16 @@ public class Worker extends Thread {
         // Manager - Add room
         if (request.type.equals("Manager") && request.function.equals("1")){
             Room newRoom = Room.addRoom(request);
-           // int numberOfRoomsBefore = assignedRooms.size();
             assignedRooms.add(newRoom);
             String message = "You succesfully added a new room\n";
             Pair<Integer, String> result = new Pair<Integer,String>(key,message);
             sendResultsToMaster(result);
-
-            //int numberOfRoomsAfter = assignedRooms.size();
-            
-            /* 
-            if (numberOfRoomsBefore == numberOfRoomsAfter){
-                // emfanise to ston user
-            }
-            */
         }
 
         // Manager - Add availability
         if (request.type.equals("Manager") && request.function.equals("2")){
             String[] details = request.details.split(",");
             String roomname = details[0];
-            //int daysBefore = 0;
-            //int daysAfter = 0;
             for (Room room : assignedRooms){
                 if (room.getRoomName().equals(roomname)){
                     //daysBefore = Available_Date.DaysAvailable(room.getAvailability());
@@ -158,14 +137,6 @@ public class Worker extends Thread {
                     String message = "You succesfully added availability";
                     Pair<Integer, String> result = new Pair<Integer,String>(key,message);
                     sendResultsToMaster(result);
-                    //daysAfter = Available_Date.DaysAvailable(room.getAvailability());
-                    
-                    /* 
-                    if (daysBefore == daysAfter){
-                        // emfanise to ston user
-                    }
-                    */
-                    
                     break;
                 }
             }

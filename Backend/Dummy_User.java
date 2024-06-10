@@ -17,7 +17,6 @@ public class Dummy_User extends Thread {
         String answer = "";
         String RoomDetails = "";
        
-
         try {
 
             while (true) {

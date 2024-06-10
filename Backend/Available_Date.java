@@ -85,7 +85,6 @@ public class Available_Date implements Serializable{
                 newDates.add(oldDate);
             }
             
-            //if(added){break;}
         }
 
         if (added == false){

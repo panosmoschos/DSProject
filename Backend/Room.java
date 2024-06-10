@@ -392,27 +392,4 @@ public class Room implements Serializable {
         }
         System.out.println("Owner: " + room.getOwner(room));
     }
-
-
-
-    // TESTING
-    /*public static void main(String[] args) {
-       String folderPath = "Backend/bin/rooms";
-
-         TESTING showBookings 
-        List<Room> ROOMS = roomsOfFolder(folderPath);
-
-        for (Room r : ROOMS){
-            if (r.owner.equals("Faidon Azariadis")){
-                System.out.println("Hello");
-            }
-        }
-
-        Request rBooking = new Request("x", folderPath, "Anatoli,2024/06/12,2024/06/13", 0);
-        Room anatoli = findRoomByName("Anatoli", ROOMS);
-        anatoli.addBooking(rBooking);
-        Request rSHOWBooking = new Request("x", folderPath, "Faidon Azariadis", 0);
-        List<Booking> FAIDONBOOKINGS = getOwnerBookings(ROOMS, rSHOWBooking);
-        System.out.println(FAIDONBOOKINGS.size());
-    */
 }
